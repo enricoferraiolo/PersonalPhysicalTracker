@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="spinner_selectActivity">
+        <item>Running</item>
+        <item>Walking</item>
+        <item>Biking</item>
+        <item>Swimming</item>
+        <item>Skating</item>
+        <item>Skateboarding</item>
+        <item>Driving</item>
+        <item>Bus</item>
+        <item>Train</item>
+        <item>Subway</item>
+        <item>Plane</item>
+        <item>Boat</item>
+        <item>Motorcycle</item>
+        <item>Car</item>
+        <item>Truck</item>
+        <item>Other</item>
+    </string-array>
+</resources>
