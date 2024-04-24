@@ -22,4 +22,14 @@
         android:name="com.example.personalphysicaltracker.ui.slideshow.SlideshowFragment"
         android:label="@string/menu_info"
         tools:layout="@layout/fragment_slideshow" />
+    <fragment
+        android:id="@+id/listFragment"
+        android:name="com.example.personalphysicaltracker.ListFragment"
+        android:label="fragment_list"
+        tools:layout="@layout/fragment_list" />
+    <fragment
+        android:id="@+id/addFragment"
+        android:name="com.example.personalphysicaltracker.AddFragment"
+        android:label="fragment_add"
+        tools:layout="@layout/fragment_add" />
 </navigation>
