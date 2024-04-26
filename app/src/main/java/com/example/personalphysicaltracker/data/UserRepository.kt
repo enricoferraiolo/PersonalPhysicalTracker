@@ -9,4 +9,8 @@ class UserRepository(private val userdao: UserDao) {
     suspend fun addUser(user: User) {
         userdao.addUser(user)
     }
+
+    suspend fun resetDB() {
+        userdao.resetDB()
+    }
 }

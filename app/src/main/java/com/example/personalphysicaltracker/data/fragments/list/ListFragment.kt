@@ -18,8 +18,15 @@ class ListFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_list, container, false)
+
+        //add user button
         view.findViewById<View>(R.id.floatingActionButton_list).setOnClickListener {
             findNavController().navigate(R.id.action_listFragment_to_addFragment)
+        }
+
+        //clear db button
+        view.findViewById<View>(R.id.clear_db_btn).setOnClickListener {
+            mUserViewModel.resetDB()
         }
 
 

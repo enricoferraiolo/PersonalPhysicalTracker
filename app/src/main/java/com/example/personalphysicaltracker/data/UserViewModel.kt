@@ -22,4 +22,11 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
             repository.addUser(user)
         }
     }
+
+    fun resetDB() {
+        //drop all tables and recreate them
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.resetDB()
+        }
+    }
 }
