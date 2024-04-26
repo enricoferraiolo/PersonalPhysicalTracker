@@ -30,5 +30,17 @@ abstract class UserDatabase: RoomDatabase(){
                 return instance
             }
         }
+
+        /*fun getDatabase(context: Context): UserDatabase {
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    UserDatabase::class.java,
+                    "user_database"
+                ).build()
+                INSTANCE = instance
+                instance
+            }
+        }*/
     }
 }
