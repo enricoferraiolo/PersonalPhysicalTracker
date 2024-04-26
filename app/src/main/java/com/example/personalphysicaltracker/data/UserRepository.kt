@@ -13,4 +13,8 @@ class UserRepository(private val userdao: UserDao) {
     suspend fun resetDB() {
         userdao.resetDB()
     }
+
+    fun isDBEmpty(): LiveData<Int> {
+        return userdao.isDBEmpty()
+    }
 }

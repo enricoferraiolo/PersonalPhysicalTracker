@@ -16,4 +16,6 @@ interface UserDao {
 
     @Query("DELETE FROM user_table")
     suspend fun resetDB()
+    @Query("SELECT COUNT(*) FROM user_table")
+    fun isDBEmpty(): LiveData<Int>
 }

@@ -23,6 +23,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".RegistrationActivity"
+            android:exported="true"
+            android:label="@string/registration_activity"
+            android:theme="@style/Theme.PersonalPhysicalTracker.NoActionBar"></activity>
     </application>
 
 </manifest>

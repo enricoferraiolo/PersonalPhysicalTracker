@@ -29,4 +29,8 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
             repository.resetDB()
         }
     }
+
+    fun isDBEmpty(): LiveData<Int> {
+        return repository.isDBEmpty()
+    }
 }

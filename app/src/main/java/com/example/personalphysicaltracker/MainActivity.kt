@@ -1,26 +1,47 @@
 package com.example.personalphysicaltracker
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.example.personalphysicaltracker.data.UserViewModel
 import com.example.personalphysicaltracker.databinding.ActivityMainBinding
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 
 
 class MainActivity : AppCompatActivity() {
-
+    private lateinit var userViewModel: UserViewModel
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        //check if database is empty
+        userViewModel = ViewModelProvider(this).get(UserViewModel::class.java)
+
+        /*if (userViewModel.isDBEmpty()) {
+            val intent = Intent(this, RegistrationActivity::class.java) //redirect to registration activity
+            startActivity(intent)
+            finish() // user will not be able to go back to MainActivity
+        }*/
+
+        userViewModel.isDBEmpty().observe(this) { rowCount ->
+            if (rowCount == 0) {
+                // db is empty, redirect to registration activity
+                val intent = Intent(this, RegistrationActivity::class.java)
+                startActivity(intent)
+                finish() // user will not be able to go back to MainActivity
+            }
+        }
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
