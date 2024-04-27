@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.example.personalphysicaltracker.R
 import com.example.personalphysicaltracker.databinding.FragmentHomeBinding
 
@@ -29,7 +30,6 @@ class HomeFragment : Fragment() {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-
         //onclicklister
         binding.homeBtnStartAndStop.setOnClickListener {
             //when btn is clicked change src
@@ -40,6 +40,12 @@ class HomeFragment : Fragment() {
                 binding.homeBtnStartAndStop.setImageResource(R.drawable.round_start_24)
                 binding.homeBtnStartAndStop.tag = "start"
             }
+        }
+
+        //add activity button
+        binding.homeBtnNewActivity.setOnClickListener {
+            //navigate to add activity fragment
+            findNavController().navigate(R.id.action_nav_home_to_addActivity)
         }
 
         return root
