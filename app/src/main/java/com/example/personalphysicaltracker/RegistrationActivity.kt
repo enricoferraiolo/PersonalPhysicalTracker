@@ -9,10 +9,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.example.personalphysicaltracker.data.User
 import com.example.personalphysicaltracker.data.UserViewModel
-import java.lang.Double
-import kotlin.Boolean
-import kotlin.String
-import kotlin.toString
 
 class RegistrationActivity : AppCompatActivity() {
     private lateinit var userViewModel: UserViewModel
@@ -36,23 +32,14 @@ class RegistrationActivity : AppCompatActivity() {
     }
 
     private fun insertDataToDatabase() {
-        val firstName =
+        val userName =
             findViewById<androidx.appcompat.widget.AppCompatEditText>(R.id.registration_name_et)?.text.toString()
-        val age =
-            findViewById<androidx.appcompat.widget.AppCompatEditText>(R.id.registration_age_et)?.text.toString()
-        val height =
-            findViewById<androidx.appcompat.widget.AppCompatEditText>(R.id.registration_height_et)?.text.toString()
-        val weight =
-            findViewById<androidx.appcompat.widget.AppCompatEditText>(R.id.registration_weight_et)?.text.toString()
 
-        if (inputCheck(firstName, age, height, weight)) {
+        if (inputCheck(userName)) {
             //Create User Object
             val user = User(
                 0,
-                firstName,
-                Integer.parseInt(age),
-                Double.parseDouble(weight),
-                Double.parseDouble(height)
+                userName
             )
 
             //Add Data to Database
@@ -64,15 +51,8 @@ class RegistrationActivity : AppCompatActivity() {
         }
     }
 
-    private fun inputCheck(
-        firstName: String,
-        age: String,
-        height: String,
-        weight: String
-    ): Boolean {
+    private fun inputCheck(userName: String): Boolean {
         //return false if any of the fields are empty
-        return !(TextUtils.isEmpty(firstName) && TextUtils.isEmpty(age) && TextUtils.isEmpty(height) && TextUtils.isEmpty(
-            weight
-        ))
+        return !(TextUtils.isEmpty(userName))
     }
 }

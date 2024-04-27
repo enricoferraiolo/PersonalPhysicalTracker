@@ -25,12 +25,6 @@ class ListAdapter : RecyclerView.Adapter<ListAdapter.MyViewHolder>() {
             currentItem.id.toString()
         holder.itemView.findViewById<com.google.android.material.textview.MaterialTextView>(R.id.name_list_frag)?.text =
             currentItem.name
-        holder.itemView.findViewById<com.google.android.material.textview.MaterialTextView>(R.id.age_list_frag)?.text =
-            currentItem.age.toString()
-        holder.itemView.findViewById<com.google.android.material.textview.MaterialTextView>(R.id.height_list_frag)?.text =
-            currentItem.height.toString()
-        holder.itemView.findViewById<com.google.android.material.textview.MaterialTextView>(R.id.weight_list_frag)?.text =
-            currentItem.weight.toString()
     }
 
     override fun getItemCount(): Int {

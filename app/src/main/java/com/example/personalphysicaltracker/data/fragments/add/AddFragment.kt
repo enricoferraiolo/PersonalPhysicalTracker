@@ -32,23 +32,14 @@ class AddFragment : Fragment() {
     }
 
     private fun insertDataToDatabase() {
-        val firstName =
+        val userName =
             view?.findViewById<androidx.appcompat.widget.AppCompatEditText>(R.id.name_et_list)?.text.toString()
-        val age =
-            view?.findViewById<androidx.appcompat.widget.AppCompatEditText>(R.id.age_et_list)?.text.toString()
-        val height =
-            view?.findViewById<androidx.appcompat.widget.AppCompatEditText>(R.id.height_et_list)?.text.toString()
-        val weight =
-            view?.findViewById<androidx.appcompat.widget.AppCompatEditText>(R.id.weight_et_list)?.text.toString()
 
-        if (inputCheck(firstName, age, height, weight)) {
+        if (inputCheck(userName)) {
             //Create User Object
             val user = User(
                 0,
-                firstName,
-                Integer.parseInt(age),
-                java.lang.Double.parseDouble(weight),
-                java.lang.Double.parseDouble(height)
+                userName
             )
 
             //Add Data to Database
@@ -62,15 +53,8 @@ class AddFragment : Fragment() {
         }
     }
 
-    private fun inputCheck(
-        firstName: String,
-        age: String,
-        height: String,
-        weight: String
-    ): Boolean {
+    private fun inputCheck(userName: String): Boolean {
         //return false if any of the fields are empty
-        return !(TextUtils.isEmpty(firstName) && TextUtils.isEmpty(age) && TextUtils.isEmpty(height) && TextUtils.isEmpty(
-            weight
-        ))
+        return !(TextUtils.isEmpty(userName))
     }
 }

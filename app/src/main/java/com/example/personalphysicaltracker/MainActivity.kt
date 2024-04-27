@@ -34,9 +34,12 @@ class MainActivity : AppCompatActivity() {
             finish() // user will not be able to go back to MainActivity
         }*/
 
-        userViewModel.isDBEmpty().observe(this) { rowCount ->
-            if (rowCount == 0) {
-                // db is empty, redirect to registration activity
+        //init db
+
+        //check if user is registered, otherwise redirect to registration activity
+        userViewModel.userCount().observe(this) { userCount ->
+            if (userCount == 0) {
+                // no user is in db, redirect to registration activity
                 val intent = Intent(this, RegistrationActivity::class.java)
                 startActivity(intent)
                 finish() // user will not be able to go back to MainActivity
