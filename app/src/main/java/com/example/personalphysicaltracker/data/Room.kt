@@ -33,7 +33,10 @@ class ExtraInfoConverter {
 }
 
 //ACTIVITIES LIST TABLE
-@Entity(tableName = "activitiesList_table")
+@Entity(
+    tableName = "activitiesList_table",
+    indices = [Index(value = ["name"], unique = true)]
+)
 data class ActivitiesList(
     @PrimaryKey(autoGenerate = true)
     val id: Int,
