@@ -49,8 +49,7 @@ class ListAdapter : RecyclerView.Adapter<ListAdapter.MyViewHolder>() {
 
     override fun onBindViewHolder(holder: ListAdapter.MyViewHolder, position: Int) {
         val currentItem = activitiesList[position]
-        holder.itemView.findViewById<com.google.android.material.textview.MaterialTextView>(R.id.id_list_frag)?.text =
-            currentItem.id.toString()
+        holder.itemView.findViewById<com.google.android.material.textview.MaterialTextView>(R.id.id_list_frag)?.text = position.toString()
         holder.itemView.findViewById<com.google.android.material.textview.MaterialTextView>(R.id.name_list_frag)?.text =
             currentItem.name
     }

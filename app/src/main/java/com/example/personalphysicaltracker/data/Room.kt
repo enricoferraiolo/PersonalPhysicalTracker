@@ -40,8 +40,7 @@ class ExtraInfoConverter {
     indices = [Index(value = ["name"], unique = true)]
 )
 data class ActivitiesList(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int,
+    @PrimaryKey(autoGenerate = false)
     val name: String,
     val extra: ExtraInfo?
 )
@@ -58,18 +57,18 @@ data class ActivitiesList(
         ),
         ForeignKey(
             entity = ActivitiesList::class,
-            parentColumns = ["id"],
-            childColumns = ["activityId"],
+            parentColumns = ["name"],
+            childColumns = ["activityName"],
             onDelete = ForeignKey.CASCADE
         )
     ],
-    indices = [Index(value = ["userId"]), Index(value = ["activityId"])]
+    indices = [Index(value = ["userId"]), Index(value = ["activityName"])]
 )
 data class Activity(
     @PrimaryKey(autoGenerate = true)
     val id: Int,
     val userId: Int,
-    val activityId: Int,
+    val activityName: Int,
     val startTime: Long,
     val finishTime: Long,
     val extra: ExtraInfo?

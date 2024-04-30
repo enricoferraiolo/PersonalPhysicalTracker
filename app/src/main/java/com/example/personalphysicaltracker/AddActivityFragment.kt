@@ -44,7 +44,6 @@ class AddActivityFragment : Fragment() {
         if (inputCheck(activityName)) {
             //Create User Object
             val activity = ActivitiesList(
-                0,
                 activityName,
                 ExtraInfo(false, false, null, null)
             )
