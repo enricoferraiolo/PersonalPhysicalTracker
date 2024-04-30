@@ -137,8 +137,10 @@ class HomeFragment : Fragment() {
         override fun run() {
             if (dataHelper.timerCounting()) {
                 val time = Date().time - dataHelper.startTime()!!.time
-                activity?.runOnUiThread {
-                    binding.homeTimer.text = timeStringFromLong(time)
+                if (_binding != null) {
+                    activity?.runOnUiThread {
+                        binding.homeTimer.text = timeStringFromLong(time)
+                    }
                 }
             }
         }
