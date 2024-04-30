@@ -11,6 +11,9 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.example.personalphysicaltracker.data.ActivitiesList
+import com.example.personalphysicaltracker.data.ActivitiesListViewModel
+import com.example.personalphysicaltracker.data.ExtraInfo
 import com.example.personalphysicaltracker.data.UserViewModel
 import com.example.personalphysicaltracker.databinding.ActivityMainBinding
 import com.google.android.material.navigation.NavigationView
@@ -19,6 +22,7 @@ import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity() {
     private lateinit var userViewModel: UserViewModel
+    private lateinit var activitiesListViewModel: ActivitiesListViewModel
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
 
@@ -38,6 +42,19 @@ class MainActivity : AppCompatActivity() {
                 val intent = Intent(this, RegistrationActivity::class.java)
                 startActivity(intent)
                 finish() // user will not be able to go back to MainActivity
+            }
+        }
+
+        //check if array of activities is empty, if so, fill it with default activities
+        activitiesListViewModel = ViewModelProvider(this).get(ActivitiesListViewModel::class.java)
+        activitiesListViewModel.readAllData.observe(this) { activities ->
+            if (activities.isEmpty()) {
+                // no activities in db, fill it with default activities
+                val defaultActivities = resources.getStringArray(R.array.default_activityList)
+                for (activity in defaultActivities) {
+                    val newActivity = ActivitiesList(0, activity, ExtraInfo(false, false, null, null))
+                    activitiesListViewModel.addActivity(newActivity)
+                }
             }
         }
 

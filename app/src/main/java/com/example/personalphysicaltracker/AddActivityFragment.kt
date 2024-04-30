@@ -15,8 +15,6 @@ import com.example.personalphysicaltracker.data.ActivitiesListViewModel
 import com.example.personalphysicaltracker.data.ExtraInfo
 
 
-
-
 /**
  * A simple [Fragment] subclass.
  * Use the [AddActivityFragment.newInstance] factory method to
@@ -48,7 +46,7 @@ class AddActivityFragment : Fragment() {
             val activity = ActivitiesList(
                 0,
                 activityName,
-                ExtraInfo(10, 2.0)
+                ExtraInfo(false, false, null, null)
             )
 
             //Add Data to Database

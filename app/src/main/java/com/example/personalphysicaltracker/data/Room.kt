@@ -16,8 +16,10 @@ data class User(
 )
 
 data class ExtraInfo(
-    val steps: Int?,
-    val meters: Double?
+    val stepsSelector: Boolean = false,
+    val metersSelector: Boolean = false,
+    val steps: Int? = null,
+    val meters: Int? = null,
 )
 
 class ExtraInfoConverter {
