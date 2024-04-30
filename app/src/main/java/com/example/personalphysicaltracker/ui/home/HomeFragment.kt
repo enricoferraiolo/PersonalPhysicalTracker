@@ -1,13 +1,7 @@
 package com.example.personalphysicaltracker.ui.home
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Context.RECEIVER_NOT_EXPORTED
-import android.content.Intent
-import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,11 +11,14 @@ import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.example.personalphysicaltracker.DataHelper
 import com.example.personalphysicaltracker.R
-import com.example.personalphysicaltracker.StopWatchService
 import com.example.personalphysicaltracker.data.ActivitiesListViewModel
 import com.example.personalphysicaltracker.databinding.FragmentHomeBinding
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import java.util.Date
+import java.util.Timer
+import java.util.TimerTask
 
 
 class HomeFragment : Fragment() {
@@ -35,6 +32,10 @@ class HomeFragment : Fragment() {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
+
+    lateinit var dataHelper: DataHelper
+    private val timer = Timer()
+
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateView(
@@ -64,12 +65,13 @@ class HomeFragment : Fragment() {
 
         //btn start activity onclicklister
         binding.homeBtnStartAndStop.setOnClickListener {
-            //when btn is clicked change src
-            if (binding.homeBtnStartAndStop.tag == "start") {  //timer is stopped, we want to start it
-                startActivity()
-            } else { //timer is running, we want to stop it
-                stopActivity()
-            }
+            startStopAction()
+        }
+
+        //btn reset onclicklistener
+        binding.homeBtnReset.setOnClickListener {
+            //reset timer
+            resetAction()
         }
 
         //add activity button
@@ -79,63 +81,83 @@ class HomeFragment : Fragment() {
         }
 
         //Stopwatch
+        dataHelper = DataHelper(requireContext().applicationContext)
 
+        if (dataHelper.timerCounting()) {
+            startTimer()
+        } else {
+            stopTimer()
+            if (dataHelper.startTime() != null && dataHelper.stopTime() != null) {
+                val time = Date().time - calcRestartTime().time
+                binding.homeTimer.text = timeStringFromLong(time)
+            }
+        }
+        timer.scheduleAtFixedRate(TimeTask(), 0, 500)
 
         return root
     }
 
-
-
-    //@RequiresApi(Build.VERSION_CODES.O)
-    private fun startActivity() {
-        changeViewSrc(binding.homeBtnStartAndStop, R.drawable.round_stop_24)
-        changeViewTag(binding.homeBtnStartAndStop, "stop")
-
-        startTimer()
-        /*Log.d("HomeFragment", "startActivity: $startTime")
-        Log.d("HomeFragment", "startActivity: ${parseTime(startTime)}")*/
-    }
-
-    private fun stopActivity() {
-        changeViewSrc(binding.homeBtnStartAndStop, R.drawable.round_start_24)
-        changeViewTag(binding.homeBtnStartAndStop, "start")
-
-        stopTimer()
-    }
-
-    /*@RequiresApi(Build.VERSION_CODES.O)
-    //return HH:MM:SS String
-    private fun parseTime(startTime: LocalDateTime): String {
-        val formatter = DateTimeFormatter.ofPattern("HH:mm:ss")
-        return startTime.format(formatter)
-    }*/
-
-    //@RequiresApi(Build.VERSION_CODES.O)
-    //start the timer
-    private fun startTimer() {
-        /*val startTime = LocalDateTime.now()
-        timerJob = viewLifecycleOwner.lifecycleScope.launch {
-            var elapsedTime = LocalDateTime.now().minusHours(startTime.hour.toLong())
-                .minusMinutes(startTime.minute.toLong())
-                .minusSeconds(startTime.second.toLong())
-            while (true) {
-                binding.homeTimer.text = parseTime(elapsedTime)
-                elapsedTime = elapsedTime.plusSeconds(1)
-                delay(1000)
+    private fun startStopAction() {
+        if (dataHelper.timerCounting()) {
+            dataHelper.setStopTime(Date())
+            stopTimer()
+        } else {
+            if (dataHelper.stopTime() != null) {
+                dataHelper.setStartTime(calcRestartTime())
+                dataHelper.setStopTime(null)
+            } else {
+                dataHelper.setStartTime(Date())
             }
-        }*/
 
-        val serviceIntent = Intent(requireContext(), StopWatchService::class.java)
-        requireContext().startService(serviceIntent)
+            startTimer()
+        }
     }
 
     private fun stopTimer() {
-        /*if (::timerJob.isInitialized && timerJob.isActive) {
-            timerJob.cancel()
-            Log.d("HomeFragment", "stopTimer: Timer stopped")
-        }*/
-        val serviceIntent = Intent(requireContext(), StopWatchService::class.java)
-        requireContext().stopService(serviceIntent)
+        dataHelper.setTimerCounting(false)
+        changeViewSrc(binding.homeBtnStartAndStop, R.drawable.round_start_24)
+        changeViewTag(binding.homeBtnStartAndStop, "start")
+
+    }
+
+    private fun startTimer() {
+        dataHelper.setTimerCounting(true)
+        changeViewSrc(binding.homeBtnStartAndStop, R.drawable.round_stop_24)
+        changeViewTag(binding.homeBtnStartAndStop, "stop")
+    }
+
+    private fun resetAction() {
+        dataHelper.setStopTime(null)
+        dataHelper.setStartTime(null)
+        stopTimer()
+        binding.homeTimer.text = timeStringFromLong(0)
+    }
+    //FIXME: QUANDO TIMETASK è ATTIVO NON POSSO CAMBIARE FRAGMENT, CRASHA L'APP
+    private inner class TimeTask : TimerTask() {
+        override fun run() {
+            if (dataHelper.timerCounting()) {
+                val time = Date().time - dataHelper.startTime()!!.time
+                activity?.runOnUiThread {
+                    binding.homeTimer.text = timeStringFromLong(time)
+                }
+            }
+        }
+    }
+
+    private fun calcRestartTime(): Date {
+        val diff = dataHelper.startTime()!!.time - dataHelper.stopTime()!!.time
+        return Date(System.currentTimeMillis() + diff)
+    }
+
+    private fun timeStringFromLong(ms: Long): String {
+        val seconds = (ms / 1000) % 60
+        val minutes = (ms / (1000 * 60) % 60)
+        val hours = (ms / (1000 * 60 * 60) % 24)
+        return makeTimeString(hours, minutes, seconds)
+    }
+
+    private fun makeTimeString(hours: Long, minutes: Long, seconds: Long): String {
+        return String.format("%02d:%02d:%02d", hours, minutes, seconds)
     }
 
 
@@ -152,30 +174,4 @@ class HomeFragment : Fragment() {
         _binding = null
     }
 
-    private val receiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            Log.d("HomeFragment", "onReceive: HO RICEVUTO")//FIXME
-            val time = intent?.getLongExtra("time", 0)
-            binding.homeTimer.text = formatTime(time ?: 0)
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    override fun onResume() {
-        super.onResume()
-        val filter = IntentFilter("STOPWATCH_UPDATED")
-        requireContext().registerReceiver(receiver, filter,RECEIVER_NOT_EXPORTED)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        requireContext().unregisterReceiver(receiver)
-    }
-
-    private fun formatTime(timeInSeconds: Long): String {
-        val hours = timeInSeconds / 3600
-        val minutes = (timeInSeconds % 3600) / 60
-        val seconds = timeInSeconds % 60
-        return String.format("%02d:%02d:%02d", hours, minutes, seconds)
-    }
 }

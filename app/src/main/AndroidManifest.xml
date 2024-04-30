@@ -33,13 +33,6 @@
             android:label="@string/registration_activity"
             android:theme="@style/Theme.PersonalPhysicalTracker.NoActionBar" />
 
-
-        <service android:name="com.example.personalphysicaltracker.StopWatchService"
-            android:exported="true"
-            android:enabled="true" >
-        </service>
-
-
     </application>
 
 </manifest>
