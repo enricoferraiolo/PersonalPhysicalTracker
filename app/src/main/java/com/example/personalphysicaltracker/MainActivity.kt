@@ -28,11 +28,6 @@ class MainActivity : AppCompatActivity() {
         //check if database is empty
         userViewModel = ViewModelProvider(this).get(UserViewModel::class.java)
 
-        /*if (userViewModel.isDBEmpty()) {
-            val intent = Intent(this, RegistrationActivity::class.java) //redirect to registration activity
-            startActivity(intent)
-            finish() // user will not be able to go back to MainActivity
-        }*/
 
         //init db
 

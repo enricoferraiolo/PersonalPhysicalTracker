@@ -14,6 +14,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.personalphysicaltracker.DataHelper
 import com.example.personalphysicaltracker.R
 import com.example.personalphysicaltracker.data.ActivitiesListViewModel
+import com.example.personalphysicaltracker.data.UserViewModel
 import com.example.personalphysicaltracker.databinding.FragmentHomeBinding
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.util.Date
@@ -22,6 +23,7 @@ import java.util.TimerTask
 
 
 class HomeFragment : Fragment() {
+    private lateinit var userViewModel: UserViewModel
 
     private var _binding: FragmentHomeBinding? = null
 
@@ -93,6 +95,16 @@ class HomeFragment : Fragment() {
             }
         }
         timer.scheduleAtFixedRate(TimeTask(), 0, 500)
+
+
+        //welcome message
+        //get user name from db
+        val userViewModel = ViewModelProvider(this).get(UserViewModel::class.java)
+        userViewModel.readAllData.observe(viewLifecycleOwner) { users ->
+            if (users.isNotEmpty()) {
+                binding.homeTvWelcome.text = "Welcome, ${users[0].name}!"
+            }
+        }
 
         return root
     }
