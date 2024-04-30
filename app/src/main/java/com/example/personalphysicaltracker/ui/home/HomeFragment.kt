@@ -132,7 +132,6 @@ class HomeFragment : Fragment() {
         stopTimer()
         binding.homeTimer.text = timeStringFromLong(0)
     }
-    //FIXME: QUANDO TIMETASK è ATTIVO NON POSSO CAMBIARE FRAGMENT, CRASHA L'APP
     private inner class TimeTask : TimerTask() {
         override fun run() {
             if (dataHelper.timerCounting()) {
