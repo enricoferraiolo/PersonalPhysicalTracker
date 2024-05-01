@@ -8,7 +8,6 @@ import android.widget.EditText
 import androidx.recyclerview.widget.RecyclerView
 import com.example.personalphysicaltracker.R
 import com.example.personalphysicaltracker.data.ActivitiesList
-import com.example.personalphysicaltracker.data.ActivitiesListViewModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class ActivitiesListAdapter(
@@ -16,7 +15,6 @@ class ActivitiesListAdapter(
     private val deleteActivityCallback: (ActivitiesList) -> Unit
 ) : RecyclerView.Adapter<ActivitiesListAdapter.MyViewHolder>() {
     private var activitiesList = emptyList<ActivitiesList>()
-    private lateinit var activitiesListViewModel: ActivitiesListViewModel
 
     private var editing = false
     private var lastBtn: FloatingActionButton? = null
@@ -37,7 +35,7 @@ class ActivitiesListAdapter(
     override fun onBindViewHolder(holder: ActivitiesListAdapter.MyViewHolder, position: Int) {
         val currentItem = activitiesList[position]
         holder.itemView.findViewById<com.google.android.material.textview.MaterialTextView>(R.id.id_list_frag)?.text =
-            position.toString()
+            currentItem.id.toString()
         val nameTextView = holder.itemView.findViewById<EditText>(R.id.name_list_frag)
         nameTextView.setText(currentItem.name)
         nameTextView.isEnabled = false
@@ -81,10 +79,29 @@ class ActivitiesListAdapter(
         nameTextView: EditText,
         currentItem: ActivitiesList
     ) {
-
+        if (editing) {
+            // Save changes and exit edit mode
+            currentItem.name = nameTextView.text.toString()
+            nameTextView.isEnabled = false
+            nameTextView.isFocusable = false
+            nameTextView.isFocusableInTouchMode = false
+            changeViewSrc(btn, R.drawable.round_edit_24) // Change the icon back to edit icon
+            editing = false
+            Log.d("ActivitiesListAdapter", "editing: $currentItem")
+            editActivityCallback(currentItem)
+        } else {
+            // Enter edit mode
+            nameTextView.isEnabled = true
+            nameTextView.isFocusable = true
+            nameTextView.isFocusableInTouchMode = true
+            nameTextView.requestFocus()
+            changeViewSrc(
+                btn,
+                R.drawable.round_check_24
+            ) // Change the icon to check icon indicating save
+            editing = true
+        }
     }
-
-
 
 
     override fun getItemCount(): Int {

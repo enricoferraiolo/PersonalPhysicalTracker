@@ -15,7 +15,6 @@ import com.example.personalphysicaltracker.data.ActivitiesList
 import com.example.personalphysicaltracker.data.ActivitiesListViewModel
 import com.example.personalphysicaltracker.data.ExtraInfo
 import com.example.personalphysicaltracker.databinding.FragmentManageActivitylistBinding
-import com.example.personalphysicaltracker.ui.home.ManageActivitylistViewModel
 
 class ManageActivitylist : Fragment() {
     private var _binding: FragmentManageActivitylistBinding? = null
@@ -65,7 +64,7 @@ class ManageActivitylist : Fragment() {
         if (inputCheck(activityName)) {
             //Create Object
             val newActivity =
-                ActivitiesList(activityName, false, ExtraInfo(false, false, null, null))
+                ActivitiesList(0, activityName, false, ExtraInfo(false, false, null, null))
 
             //Add Data to Database
             val activitiesListViewModel =

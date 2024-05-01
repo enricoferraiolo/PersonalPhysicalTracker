@@ -1,4 +1,4 @@
-package com.example.personalphysicaltracker.ui.home
+package com.example.personalphysicaltracker.ui.manageActivitylist
 
 import android.app.Application
 import android.util.Log
@@ -12,13 +12,12 @@ class ManageActivitylistViewModel<ActivitiesList> : ViewModel() {
     }
     fun editActivity(activity: com.example.personalphysicaltracker.data.ActivitiesList) {
         Log.d("ManageActivitylistViewModel", "editing: $activity")
-        //activitiesListViewModel.updateActivity(activity)
+        activitiesListViewModel.updateActivity(activity)
     }
 
     fun deleteActivity(activity: com.example.personalphysicaltracker.data.ActivitiesList) {
         Log.d("ManageActivitylistViewModel", "deleting: $activity")
         activitiesListViewModel.deleteActivity(activity)
-
     }
 
 }

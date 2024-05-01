@@ -40,8 +40,9 @@ class ExtraInfoConverter {
     indices = [Index(value = ["name"], unique = true)]
 )
 data class ActivitiesList(
-    @PrimaryKey(autoGenerate = false)
-    val name: String,
+    @PrimaryKey(autoGenerate = true)
+    val id: Int,
+    var name: String,
     val isDefault: Boolean? = false,
     val extra: ExtraInfo?
 )
@@ -58,18 +59,18 @@ data class ActivitiesList(
         ),
         ForeignKey(
             entity = ActivitiesList::class,
-            parentColumns = ["name"],
-            childColumns = ["activityName"],
+            parentColumns = ["id"],
+            childColumns = ["activityId"],
             onDelete = ForeignKey.NO_ACTION //if activity is deleted, keep the activity in the db
         )
     ],
-    indices = [Index(value = ["userId"]), Index(value = ["activityName"])]
+    indices = [Index(value = ["userId"]), Index(value = ["activityId"])]
 )
 data class Activity(
     @PrimaryKey(autoGenerate = true)
     val id: Int,
     val userId: Int,
-    val activityName: Int,
+    val activityId: Int,
     val startTime: Long,
     val finishTime: Long,
     val extra: ExtraInfo?
