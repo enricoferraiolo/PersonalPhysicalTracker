@@ -24,24 +24,6 @@
         android:label="@string/menu_info"
         tools:layout="@layout/fragment_slideshow" />
     <fragment
-        android:id="@+id/listFragment"
-        android:name="com.example.personalphysicaltracker.data.fragments.list.ListFragment"
-        android:label="fragment_list"
-        tools:layout="@layout/fragment_list" >
-        <action
-            android:id="@+id/action_listFragment_to_addFragment"
-            app:destination="@id/addFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/addFragment"
-        android:name="com.example.personalphysicaltracker.data.fragments.add.AddFragment"
-        android:label="fragment_add"
-        tools:layout="@layout/fragment_add" >
-        <action
-            android:id="@+id/action_addFragment_to_listFragment"
-            app:destination="@id/listFragment" />
-    </fragment>
-    <fragment
         android:id="@+id/nav_insertNewActivity"
         android:name="com.example.personalphysicaltracker.ui.manageActivitylist.ManageActivitylist"
         android:label="fragment_insert_new_activity"

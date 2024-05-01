@@ -39,6 +39,18 @@ class ManageActivitylist : Fragment() {
             insertDataToDatabase()
         }
 
+        //recyclerview
+        val adapter = ActivitiesListAdapter()
+        val recyclerView = binding.managerRvActivitiesList
+        recyclerView.adapter = adapter
+        recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
+
+        //ActivitiesListViewModel
+        val activitiesListViewModel = ViewModelProvider(this).get(ActivitiesListViewModel::class.java)
+        activitiesListViewModel.readAllData.observe(viewLifecycleOwner) { activitiesList ->
+            adapter.setData(activitiesList)
+        }
+
         return root
     }
 

@@ -59,7 +59,7 @@ data class ActivitiesList(
             entity = ActivitiesList::class,
             parentColumns = ["name"],
             childColumns = ["activityName"],
-            onDelete = ForeignKey.CASCADE
+            onDelete = ForeignKey.NO_ACTION //if activity is deleted, keep the activity in the db
         )
     ],
     indices = [Index(value = ["userId"]), Index(value = ["activityName"])]
