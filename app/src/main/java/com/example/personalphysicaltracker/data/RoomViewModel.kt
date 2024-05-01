@@ -52,6 +52,18 @@ class ActivitiesListViewModel(application: Application) : AndroidViewModel(appli
             repository.addActivity(activity)
         }
     }
+
+    fun deleteActivity(activity: ActivitiesList) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.deleteActivity(activity)
+        }
+    }
+
+    fun updateActivity(activity: ActivitiesList) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.updateActivity(activity)
+        }
+    }
 }
 
 //ACTIVITIES VIEW MODEL

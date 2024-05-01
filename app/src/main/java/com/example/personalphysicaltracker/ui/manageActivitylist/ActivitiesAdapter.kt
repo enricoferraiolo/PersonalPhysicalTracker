@@ -7,10 +7,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.personalphysicaltracker.R
 import com.example.personalphysicaltracker.data.ActivitiesList
+import com.example.personalphysicaltracker.data.ActivitiesListViewModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
-class ActivitiesListAdapter: RecyclerView.Adapter<ActivitiesListAdapter.MyViewHolder>() {
+class ActivitiesListAdapter(private val editActivityCallback: (ActivitiesList) -> Unit, private val deleteActivityCallback: (ActivitiesList) -> Unit): RecyclerView.Adapter<ActivitiesListAdapter.MyViewHolder>() {
     private var activitiesList = emptyList<ActivitiesList>()
+    private lateinit var activitiesListViewModel: ActivitiesListViewModel
 
     class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     }
@@ -39,12 +41,11 @@ class ActivitiesListAdapter: RecyclerView.Adapter<ActivitiesListAdapter.MyViewHo
     }
 
     private fun deleteActivity(currentItem: ActivitiesList) {
-        Log.d("ActivitiesListAdapter", "deleteActivity: $currentItem")
-
+        deleteActivityCallback(currentItem)
     }
 
     private fun editActivity(currentItem: ActivitiesList) {
-        Log.d("ActivitiesListAdapter", "editActivity: $currentItem")
+        editActivityCallback(currentItem)
     }
 
     override fun getItemCount(): Int {

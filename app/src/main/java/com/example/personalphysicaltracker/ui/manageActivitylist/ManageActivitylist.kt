@@ -21,7 +21,7 @@ class ManageActivitylist : Fragment() {
     private var _binding: FragmentManageActivitylistBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var manageActivitylistViewModel: ManageActivitylistViewModel
+    private lateinit var manageActivitylistViewModel: ManageActivitylistViewModel<Any?>
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,7 +40,10 @@ class ManageActivitylist : Fragment() {
         }
 
         //recyclerview
-        val adapter = ActivitiesListAdapter()
+        val adapter = ActivitiesListAdapter(
+            { activitiesList -> manageActivitylistViewModel.editActivity(activitiesList) },
+            { activitiesList -> manageActivitylistViewModel.deleteActivity(activitiesList) }
+        )
         val recyclerView = binding.managerRvActivitiesList
         recyclerView.adapter = adapter
         recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())

@@ -2,9 +2,11 @@ package com.example.personalphysicaltracker.data
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 
 //USER DAO
 @Dao
@@ -30,6 +32,12 @@ interface ActivitiesListDao {
 
     @Query("SELECT * FROM activitiesList_table")
     fun readAllData(): LiveData<List<ActivitiesList>>
+
+    @Delete
+    suspend fun deleteActivity(activity: ActivitiesList)
+
+    @Update
+    suspend fun updateActivity(activity: ActivitiesList)
 }
 
 //ACTIVITIES DAO
