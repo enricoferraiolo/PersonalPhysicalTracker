@@ -10,9 +10,6 @@
         android:name="com.example.personalphysicaltracker.ui.home.HomeFragment"
         android:label="@string/menu_home"
         tools:layout="@layout/fragment_home" >
-        <action
-            android:id="@+id/action_nav_home_to_addActivity"
-            app:destination="@id/addActivity" />
     </fragment>
 
     <fragment
@@ -45,12 +42,8 @@
             app:destination="@id/listFragment" />
     </fragment>
     <fragment
-        android:id="@+id/addActivity"
-        android:name="com.example.personalphysicaltracker.AddActivityFragment"
-        android:label="fragment_add_activity"
-        tools:layout="@layout/fragment_add_activity" >
-        <action
-            android:id="@+id/action_addActivity_to_nav_home"
-            app:destination="@id/nav_home" />
-    </fragment>
+        android:id="@+id/nav_insertNewActivity"
+        android:name="com.example.personalphysicaltracker.ui.manageActivitylist.ManageActivitylist"
+        android:label="fragment_insert_new_activity"
+        tools:layout="@layout/fragment_manage_activitylist" />
 </navigation>

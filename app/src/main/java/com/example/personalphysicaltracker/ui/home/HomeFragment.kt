@@ -10,7 +10,6 @@ import android.widget.Spinner
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.findNavController
 import com.example.personalphysicaltracker.DataHelper
 import com.example.personalphysicaltracker.R
 import com.example.personalphysicaltracker.data.ActivitiesListViewModel
@@ -28,7 +27,6 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
 
     private lateinit var activitiesListViewModel: ActivitiesListViewModel
-    //private lateinit var timerJob: Job
 
 
     // This property is only valid between onCreateView and
@@ -76,11 +74,6 @@ class HomeFragment : Fragment() {
             resetAction()
         }
 
-        //add activity button
-        binding.homeBtnNewActivity.setOnClickListener {
-            //navigate to add activity fragment
-            findNavController().navigate(R.id.action_nav_home_to_addActivity)
-        }
 
         //Stopwatch
         dataHelper = DataHelper(requireContext().applicationContext)
@@ -144,6 +137,7 @@ class HomeFragment : Fragment() {
         stopTimer()
         binding.homeTimer.text = timeStringFromLong(0)
     }
+
     private inner class TimeTask : TimerTask() {
         override fun run() {
             if (dataHelper.timerCounting()) {
