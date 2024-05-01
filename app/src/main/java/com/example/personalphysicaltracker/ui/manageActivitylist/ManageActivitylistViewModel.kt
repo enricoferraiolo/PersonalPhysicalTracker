@@ -12,8 +12,7 @@ class ManageActivitylistViewModel<ActivitiesList> : ViewModel() {
     }
     fun editActivity(activity: com.example.personalphysicaltracker.data.ActivitiesList) {
         Log.d("ManageActivitylistViewModel", "editing: $activity")
-        TODO("Not yet implemented")
-        activitiesListViewModel.updateActivity(activity)
+        //activitiesListViewModel.updateActivity(activity)
     }
 
     fun deleteActivity(activity: com.example.personalphysicaltracker.data.ActivitiesList) {

@@ -18,7 +18,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.5" />
 
-    <TextView
+    <EditText
         android:id="@+id/name_list_frag"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"

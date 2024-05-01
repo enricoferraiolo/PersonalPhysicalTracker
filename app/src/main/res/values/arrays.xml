@@ -2,19 +2,7 @@
 <resources>
     <string-array name="default_activityList">
         <item>Taking a break</item>
-        <item>Running</item>
         <item>Walking</item>
-        <item>Biking</item>
-        <item>Swimming</item>
-        <item>Skating</item>
-        <item>Skateboarding</item>
-        <item>Driving</item>
-        <item>on Bus</item>
-        <item>on Train</item>
-        <item>on Subway</item>
-        <item>on Plane</item>
-        <item>on Boat</item>
-        <item>on Motorcycle</item>
-        <item>on Car</item>
+        <item>Running</item>
     </string-array>
 </resources>

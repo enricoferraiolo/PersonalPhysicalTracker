@@ -51,7 +51,7 @@ class MainActivity : AppCompatActivity() {
                 // no activities in db, fill it with default activities
                 val defaultActivities = resources.getStringArray(R.array.default_activityList)
                 for (activityName in defaultActivities) {
-                    val newActivity = ActivitiesList(activityName, ExtraInfo(false, false, null, null))
+                    val newActivity = ActivitiesList(activityName,true, ExtraInfo(false, false, null, null))
                     activitiesListViewModel.addActivity(newActivity)
                 }
             }

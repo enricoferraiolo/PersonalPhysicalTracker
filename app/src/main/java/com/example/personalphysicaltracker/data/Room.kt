@@ -42,6 +42,7 @@ class ExtraInfoConverter {
 data class ActivitiesList(
     @PrimaryKey(autoGenerate = false)
     val name: String,
+    val isDefault: Boolean? = false,
     val extra: ExtraInfo?
 )
 

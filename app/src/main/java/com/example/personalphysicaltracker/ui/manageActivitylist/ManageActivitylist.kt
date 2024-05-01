@@ -46,10 +46,12 @@ class ManageActivitylist : Fragment() {
         )
         val recyclerView = binding.managerRvActivitiesList
         recyclerView.adapter = adapter
-        recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
+        recyclerView.layoutManager =
+            androidx.recyclerview.widget.LinearLayoutManager(requireContext())
 
         //ActivitiesListViewModel
-        val activitiesListViewModel = ViewModelProvider(this).get(ActivitiesListViewModel::class.java)
+        val activitiesListViewModel =
+            ViewModelProvider(this).get(ActivitiesListViewModel::class.java)
         activitiesListViewModel.readAllData.observe(viewLifecycleOwner) { activitiesList ->
             adapter.setData(activitiesList)
         }
@@ -62,7 +64,8 @@ class ManageActivitylist : Fragment() {
 
         if (inputCheck(activityName)) {
             //Create Object
-            val newActivity = ActivitiesList(activityName, ExtraInfo(false, false, null, null))
+            val newActivity =
+                ActivitiesList(activityName, false, ExtraInfo(false, false, null, null))
 
             //Add Data to Database
             val activitiesListViewModel =

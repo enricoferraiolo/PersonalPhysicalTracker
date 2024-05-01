@@ -87,7 +87,7 @@ class HomeFragment : Fragment() {
                 binding.homeTimer.text = timeStringFromLong(time)
             }
         }
-        timer.scheduleAtFixedRate(TimeTask(), 0, 500)
+        timer.schedule(TimeTask(), 0, 500)
 
 
         //welcome message
