@@ -84,7 +84,9 @@ class HomeFragment : Fragment() {
             stopTimer()
             if (dataHelper.startTime() != null && dataHelper.stopTime() != null) {
                 val time = Date().time - calcRestartTime().time
-                binding.homeTimer.text = timeStringFromLong(time)
+                if (_binding != null) {
+                    binding.homeTimer.text = timeStringFromLong(time)
+                }
             }
         }
         timer.schedule(TimeTask(), 0, 500)
@@ -142,10 +144,8 @@ class HomeFragment : Fragment() {
         override fun run() {
             if (dataHelper.timerCounting()) {
                 val time = Date().time - dataHelper.startTime()!!.time
-                if (_binding != null) {
-                    activity?.runOnUiThread {
-                        binding.homeTimer.text = timeStringFromLong(time)
-                    }
+                activity?.runOnUiThread {
+                    binding.homeTimer.text = timeStringFromLong(time)
                 }
             }
         }

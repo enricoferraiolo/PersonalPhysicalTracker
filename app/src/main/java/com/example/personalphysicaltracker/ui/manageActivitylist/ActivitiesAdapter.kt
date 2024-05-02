@@ -1,6 +1,5 @@
 package com.example.personalphysicaltracker.ui.manageActivitylist
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,9 +14,10 @@ class ActivitiesListAdapter(
     private val deleteActivityCallback: (ActivitiesList) -> Unit
 ) : RecyclerView.Adapter<ActivitiesListAdapter.MyViewHolder>() {
     private var activitiesList = emptyList<ActivitiesList>()
-
     private var editing = false
-    private var lastBtn: FloatingActionButton? = null
+    private var lastItem: ActivitiesList? = null
+    private var lastEditBtn: FloatingActionButton? = null
+    private var lastNameET: EditText? = null
 
     class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     }
@@ -42,32 +42,40 @@ class ActivitiesListAdapter(
         nameTextView.isFocusable = false
         nameTextView.isFocusableInTouchMode = false
 
+        val btnEdit = holder.itemView.findViewById<FloatingActionButton>(R.id.custom_row_btn_edit)
+        val btnDelete =
+            holder.itemView.findViewById<FloatingActionButton>(R.id.custom_row_btn_delete)
+
+        btnDelete.isEnabled = true
+        btnEdit.isEnabled = true
 
         //if item is in default list, disable delete button
         if (currentItem.isDefault == true) {
-            holder.itemView.findViewById<FloatingActionButton>(R.id.custom_row_btn_delete).isEnabled =
-                false
-            holder.itemView.findViewById<FloatingActionButton>(R.id.custom_row_btn_edit).isEnabled =
-                false
-
-            Log.d("ActivitiesListAdapter", "default item: ${currentItem.name} IS DEFAULT")
+            btnDelete.isEnabled = false
+            btnEdit.isEnabled = false
         }
 
-        //set on click listener for each item
-        holder.itemView.findViewById<FloatingActionButton>(R.id.custom_row_btn_edit)
-            .setOnClickListener {
-                editActivity(
-                    holder.itemView.findViewById<FloatingActionButton>(R.id.custom_row_btn_edit),
-                    nameTextView,
-                    currentItem
-                )
-            }
+        //reset last items
+        setLastItems(null, null, null)
 
-        holder.itemView.findViewById<FloatingActionButton>(R.id.custom_row_btn_delete)
-            .setOnClickListener {
-                deleteActivity(currentItem)
-            }
+        //reset editing
+        resetEditBtn(btnEdit)
+
+
+        //set on click listener for each item
+        btnEdit.setOnClickListener {
+            editActivity(
+                btnEdit,
+                nameTextView,
+                currentItem
+            )
+        }
+
+        btnDelete.setOnClickListener {
+            deleteActivity(currentItem)
+        }
     }
+
 
     private fun deleteActivity(currentItem: ActivitiesList) {
         deleteActivityCallback(currentItem)
@@ -79,27 +87,23 @@ class ActivitiesListAdapter(
         nameTextView: EditText,
         currentItem: ActivitiesList
     ) {
-        if (editing) {
-            // Save changes and exit edit mode
-            currentItem.name = nameTextView.text.toString()
-            nameTextView.isEnabled = false
-            nameTextView.isFocusable = false
-            nameTextView.isFocusableInTouchMode = false
-            changeViewSrc(btn, R.drawable.round_edit_24) // Change the icon back to edit icon
-            editing = false
-            Log.d("ActivitiesListAdapter", "editing: $currentItem")
-            editActivityCallback(currentItem)
-        } else {
-            // Enter edit mode
-            nameTextView.isEnabled = true
-            nameTextView.isFocusable = true
-            nameTextView.isFocusableInTouchMode = true
-            nameTextView.requestFocus()
-            changeViewSrc(
-                btn,
-                R.drawable.round_check_24
-            ) // Change the icon to check icon indicating save
+        if (lastItem != null && lastItem != currentItem) {
+            resetEditBtn(lastEditBtn!!)
+            changeETStatus(lastNameET!!, false)
+        }
+
+        if (!editing) {//if not editing, change to editing mode
             editing = true
+            changeViewSrc(btn, R.drawable.round_check_24)
+            changeETStatus(nameTextView, true)
+            setLastItems(currentItem, btn, nameTextView)
+        } else {    //if editing, save changes
+            editing = false
+            changeViewSrc(btn, R.drawable.round_edit_24)
+            changeETStatus(nameTextView, false)
+            currentItem.name = nameTextView.text.toString()
+            editActivityCallback(currentItem)
+            setLastItems(null, null, null)
         }
     }
 
@@ -120,5 +124,17 @@ class ActivitiesListAdapter(
     private fun resetEditBtn(button: FloatingActionButton) {
         button.setImageResource(R.drawable.round_edit_24)
         editing = false
+    }
+
+    private fun changeETStatus(editText: EditText, status: Boolean) {
+        editText.isEnabled = status
+        editText.isFocusable = status
+        editText.isFocusableInTouchMode = status
+    }
+
+    private fun setLastItems(item: ActivitiesList?, btn: FloatingActionButton?, et: EditText?) {
+        lastItem = item
+        lastEditBtn = btn
+        lastNameET = et
     }
 }
