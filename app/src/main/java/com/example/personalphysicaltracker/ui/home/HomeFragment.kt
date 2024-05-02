@@ -1,5 +1,6 @@
 package com.example.personalphysicaltracker.ui.home
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,15 +11,13 @@ import android.widget.Spinner
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.example.personalphysicaltracker.DataHelper
 import com.example.personalphysicaltracker.R
+import com.example.personalphysicaltracker.StopwatchService
 import com.example.personalphysicaltracker.data.ActivitiesListViewModel
 import com.example.personalphysicaltracker.data.UserViewModel
 import com.example.personalphysicaltracker.databinding.FragmentHomeBinding
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import java.util.Date
 import java.util.Timer
-import java.util.TimerTask
 
 
 class HomeFragment : Fragment() {
@@ -29,11 +28,12 @@ class HomeFragment : Fragment() {
     private lateinit var activitiesListViewModel: ActivitiesListViewModel
 
 
+
+
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
 
-    lateinit var dataHelper: DataHelper
     private val timer = Timer()
 
 
@@ -76,20 +76,6 @@ class HomeFragment : Fragment() {
 
 
         //Stopwatch
-        dataHelper = DataHelper(requireContext().applicationContext)
-
-        if (dataHelper.timerCounting()) {
-            startTimer()
-        } else {
-            stopTimer()
-            if (dataHelper.startTime() != null && dataHelper.stopTime() != null) {
-                val time = Date().time - calcRestartTime().time
-                if (_binding != null) {
-                    binding.homeTimer.text = timeStringFromLong(time)
-                }
-            }
-        }
-        timer.schedule(TimeTask(), 0, 500)
 
 
         //welcome message
@@ -104,57 +90,49 @@ class HomeFragment : Fragment() {
         return root
     }
 
-    private fun startStopAction() {
-        if (dataHelper.timerCounting()) {
-            dataHelper.setStopTime(Date())
-            stopTimer()
-        } else {
-            if (dataHelper.stopTime() != null) {
-                dataHelper.setStartTime(calcRestartTime())
-                dataHelper.setStopTime(null)
-            } else {
-                dataHelper.setStartTime(Date())
-            }
+    private var isTimerRunning = false
 
+    private fun startStopAction() {
+        isTimerRunning = !isTimerRunning // Toggle lo stato del timer
+
+        if (isTimerRunning) {
             startTimer()
+        } else {
+            stopTimer()
         }
+
+
     }
 
     private fun stopTimer() {
-        dataHelper.setTimerCounting(false)
         changeViewSrc(binding.homeBtnStartAndStop, R.drawable.round_start_24)
         changeViewTag(binding.homeBtnStartAndStop, "start")
 
+        //send intent to StopwatchService to stop the service
+        Intent(StopwatchService.Actions.STOP.name).also {
+            it.setClass(requireContext(), StopwatchService::class.java)
+            requireContext().startService(it)
+        }
     }
 
     private fun startTimer() {
-        dataHelper.setTimerCounting(true)
         changeViewSrc(binding.homeBtnStartAndStop, R.drawable.round_stop_24)
         changeViewTag(binding.homeBtnStartAndStop, "stop")
+
+        //send intent to StopwatchService to start the service
+        Intent(StopwatchService.Actions.START.name).also {
+            it.setClass(requireContext(), StopwatchService::class.java)
+            requireContext().startService(it)
+        }
+
     }
 
     private fun resetAction() {
-        dataHelper.setStopTime(null)
-        dataHelper.setStartTime(null)
         stopTimer()
         binding.homeTimer.text = timeStringFromLong(0)
     }
 
-    private inner class TimeTask : TimerTask() {
-        override fun run() {
-            if (dataHelper.timerCounting()) {
-                val time = Date().time - dataHelper.startTime()!!.time
-                activity?.runOnUiThread {
-                    binding.homeTimer.text = timeStringFromLong(time)
-                }
-            }
-        }
-    }
 
-    private fun calcRestartTime(): Date {
-        val diff = dataHelper.startTime()!!.time - dataHelper.stopTime()!!.time
-        return Date(System.currentTimeMillis() + diff)
-    }
 
     private fun timeStringFromLong(ms: Long): String {
         val seconds = (ms / 1000) % 60
