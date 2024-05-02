@@ -14,7 +14,7 @@ class StopwatchApp: Application(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 "Stopwatch_channel",
-                "Stopwatch",
+                "Physical Activity",
                 NotificationManager.IMPORTANCE_HIGH
             )
             val notificationManager =

@@ -2,6 +2,7 @@ package com.example.personalphysicaltracker
 
 import android.app.Service
 import android.content.Intent
+import android.os.Binder
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
@@ -10,8 +11,16 @@ import androidx.core.app.NotificationCompat
 const val CHANNEL_ID = "Stopwatch_channel"
 
 class StopwatchService : Service() {
+    private val binder = LocalBinder()
+
+    inner class LocalBinder : Binder() {
+        fun getService(): StopwatchService {
+            return this@StopwatchService
+        }
+    }
+
     override fun onBind(intent: Intent?): IBinder? {
-        return null
+        return binder
     }
 
     private var isTimerRunning = false
@@ -21,11 +30,12 @@ class StopwatchService : Service() {
 
     //triggered when a component sends an intent to start the service
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        when(intent?.action){
+        when (intent?.action) {
             Actions.START.name -> {
                 //start the stopwatch
                 startTimer()
             }
+
             Actions.STOP.name -> {
                 //stop the stopwatch
                 stopTimer()
@@ -39,12 +49,14 @@ class StopwatchService : Service() {
         isTimerRunning = true
 
         updateNotification("Elapsed time: ${timeStringFromLong(elapsedTimeMillis)}")
+        updateElapsedTime(elapsedTimeMillis)
 
         handler = Handler(Looper.getMainLooper())
         timerRunnable = object : Runnable {
             override fun run() {
                 elapsedTimeMillis += 1000
                 updateNotification("Elapsed time: ${timeStringFromLong(elapsedTimeMillis)}")
+                updateElapsedTime(elapsedTimeMillis)
                 handler.postDelayed(this, 1000)
             }
         }
@@ -76,16 +88,30 @@ class StopwatchService : Service() {
 
     private fun updateNotification(text: String) {
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Stopwatch")
+            .setContentTitle("Physical Activity")
             .setContentText(text)
             .setSmallIcon(R.drawable.ic_launcher_background)
             .build()
 
-        startForeground(1, notification)
+        startForeground(1, notification) //FIXME mettere a posto perche devo fare update della notifica non crearne una nuova sempre
+    }
+
+    private val listeners = mutableListOf<StopwatchServiceListener>()
+
+    fun addListener(listener: StopwatchServiceListener) {
+        listeners.add(listener)
+    }
+
+    fun removeListener(listener: StopwatchServiceListener) {
+        listeners.remove(listener)
+    }
+
+    private fun updateElapsedTime(elapsedTimeMillis: Long) {
+        listeners.forEach { it.onElapsedTimeChanged(elapsedTimeMillis) }
     }
 
 
-    enum class Actions{
+    enum class Actions {
         START,
         STOP
     }
