@@ -86,14 +86,21 @@ class StopwatchService : Service() {
         updateNotification("Elapsed time: 00:00:00")
     }
 
+    private val NOTIFICATION_ID = 1
+    private var notificationInitialized = false
+    private lateinit var notificationBuilder: NotificationCompat.Builder
     private fun updateNotification(text: String) {
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Physical Activity")
             .setContentText(text)
-            .setSmallIcon(R.drawable.ic_launcher_background)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setColor(getColor(R.color.ic_launcher_background))
             .build()
 
-        startForeground(1, notification) //FIXME mettere a posto perche devo fare update della notifica non crearne una nuova sempre
+        startForeground(
+            NOTIFICATION_ID,
+            notification
+        )
     }
 
     private val listeners = mutableListOf<StopwatchServiceListener>()

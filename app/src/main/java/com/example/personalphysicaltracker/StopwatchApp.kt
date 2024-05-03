@@ -15,7 +15,7 @@ class StopwatchApp: Application(){
             val channel = NotificationChannel(
                 "Stopwatch_channel",
                 "Physical Activity",
-                NotificationManager.IMPORTANCE_HIGH
+                NotificationManager.IMPORTANCE_LOW
             )
             val notificationManager =
                 getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
