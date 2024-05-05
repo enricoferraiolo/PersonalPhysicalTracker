@@ -1,8 +1,13 @@
 package com.example.personalphysicaltracker
 
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Build
 import android.os.Bundle
+import android.os.IBinder
+import android.util.Log
 import android.view.Menu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -19,13 +24,24 @@ import com.example.personalphysicaltracker.data.ExtraInfo
 import com.example.personalphysicaltracker.data.UserViewModel
 import com.example.personalphysicaltracker.databinding.ActivityMainBinding
 import com.google.android.material.navigation.NavigationView
+import java.util.Timer
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchControlListener {
+    override fun onElapsedTimeChanged(elapsedTimeMillis: Long) {
+        Log.d("MainActivity", "Elapsed time: $elapsedTimeMillis")
+        sharedTimerViewModel.setElapsedTimeMillis(elapsedTimeMillis)
+    }
+
+
     private lateinit var userViewModel: UserViewModel
     private lateinit var activitiesListViewModel: ActivitiesListViewModel
+    private lateinit var sharedTimerViewModel: SharedTimerViewModel
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
+
+
+    private val timer = Timer()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -94,6 +110,47 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
+        //SharedTimerViewModel
+        sharedTimerViewModel = ViewModelProvider(this).get(SharedTimerViewModel::class.java)
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        // Bind to stopwatch service
+        bindToStopwatchService()
+    }
+
+    private val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            val binder = service as StopwatchService.LocalBinder
+            val stopwatchService = binder.getService()
+
+
+            stopwatchService.addListener(this@MainActivity)
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            // Handle service disconnection
+        }
+    }
+
+    private fun bindToStopwatchService() {
+        val intent = Intent(applicationContext, StopwatchService::class.java)
+        applicationContext.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
+
+        Log.d("MainActivity", "Service bound")
+    }
+
+    private fun unbindFromStopwatchService() {
+        applicationContext.unbindService(serviceConnection)
+
+        serviceConnection.onServiceDisconnected(null)
+
+
+        Log.d("MainActivity", "Service unbound")
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -106,4 +163,43 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
+
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        // Unbind from service
+        unbindFromStopwatchService()
+    }
+
+    override fun startStopwatch() {
+        Log.e("MainActivity", "isTimerRunning: ${sharedTimerViewModel.isTimerRunning.value}")
+        sharedTimerViewModel.setIsTimerRunning(true)
+
+        // Avvia il cronometro nel servizio StopwatchService
+        val intent = Intent(this, StopwatchService::class.java)
+        intent.action = StopwatchService.Actions.START.name
+        startService(intent)
+    }
+
+    override fun stopStopwatch() {
+        sharedTimerViewModel.setIsTimerRunning(false)
+    Log.e("MainActivity", "isTimerRunning: STOPPED")
+
+        // Ferma il cronometro nel servizio StopwatchService
+        val intent = Intent(this, StopwatchService::class.java)
+        intent.action = StopwatchService.Actions.STOP.name
+        startService(intent)
+    }
+
+    override fun resetStopwatch() {
+        sharedTimerViewModel.setIsTimerRunning(false)
+        sharedTimerViewModel.setElapsedTimeMillis(0)
+
+        // Resetta il cronometro nel servizio StopwatchService
+        val intent = Intent(this, StopwatchService::class.java)
+        intent.action = StopwatchService.Actions.RESET.name
+        startService(intent)
+    }
+
 }

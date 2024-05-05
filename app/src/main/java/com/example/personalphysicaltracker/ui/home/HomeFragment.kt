@@ -1,12 +1,8 @@
 package com.example.personalphysicaltracker.ui.home
 
-import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
 import android.os.Build
 import android.os.Bundle
-import android.os.IBinder
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -17,8 +13,8 @@ import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.personalphysicaltracker.R
-import com.example.personalphysicaltracker.StopwatchService
-import com.example.personalphysicaltracker.StopwatchServiceListener
+import com.example.personalphysicaltracker.SharedTimerViewModel
+import com.example.personalphysicaltracker.StopwatchControlListener
 import com.example.personalphysicaltracker.data.ActivitiesListViewModel
 import com.example.personalphysicaltracker.data.UserViewModel
 import com.example.personalphysicaltracker.databinding.FragmentHomeBinding
@@ -26,12 +22,25 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.util.Timer
 
 
-class HomeFragment : Fragment(), StopwatchServiceListener {
+class HomeFragment : Fragment() {
     private lateinit var userViewModel: UserViewModel
 
     private var _binding: FragmentHomeBinding? = null
 
     private lateinit var activitiesListViewModel: ActivitiesListViewModel
+
+    private lateinit var stopwatchControlListener: StopwatchControlListener
+
+    private lateinit var sharedTimerViewModel: SharedTimerViewModel
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is StopwatchControlListener) {
+            stopwatchControlListener = context
+        } else {
+            throw RuntimeException("$context must implement StopwatchControlListener")
+        }
+    }
 
 
     // This property is only valid between onCreateView and
@@ -40,6 +49,8 @@ class HomeFragment : Fragment(), StopwatchServiceListener {
 
     private val timer = Timer()
 
+    private var isTimerRunning = false
+
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateView(
@@ -47,9 +58,6 @@ class HomeFragment : Fragment(), StopwatchServiceListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val homeViewModel =
-            ViewModelProvider(this).get(HomeViewModel::class.java)
-
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
@@ -69,6 +77,7 @@ class HomeFragment : Fragment(), StopwatchServiceListener {
 
         //btn start activity onclicklister
         binding.homeBtnStartAndStop.setOnClickListener {
+            Log.d("HomeFragment", "-- btn start/stop clicked --")
             startStopAction()
         }
 
@@ -79,7 +88,27 @@ class HomeFragment : Fragment(), StopwatchServiceListener {
         }
 
 
-        //Stopwatch
+        //SharedTimerViewModel
+        sharedTimerViewModel =
+            ViewModelProvider(requireActivity()).get(SharedTimerViewModel::class.java)
+
+        //check if timer is running from sharedTimerViewModel
+        sharedTimerViewModel.elapsedTimeMillis.observe(viewLifecycleOwner) { elapsedTime ->
+            binding.homeTimer.text = timeStringFromLong(elapsedTime)
+            if (elapsedTime > 0) {
+                startTimer(true)
+            }
+        }
+        /*sharedTimerViewModel.isTimerRunning.observe(viewLifecycleOwner) { isRunning ->
+            Log.e("HomeFragment", "isTimerRunning: $isRunning")
+            isTimerRunning = isRunning
+
+            if (isRunning) {
+                startTimer(true)
+            } else {
+                stopTimer(true)
+            }
+        }*/
 
 
         //welcome message
@@ -94,46 +123,53 @@ class HomeFragment : Fragment(), StopwatchServiceListener {
         return root
     }
 
-    private var isTimerRunning = false
 
     private fun startStopAction() {
-        isTimerRunning = !isTimerRunning // Toggle lo stato del timer
 
-        if (isTimerRunning) {
+        //observe the timer state
+        if (binding.homeBtnStartAndStop.tag == "start") {
             startTimer()
         } else {
             stopTimer()
         }
-
-
     }
 
-    private fun stopTimer() {
+    private fun stopTimer(stopwatchAlreadyStopped: Boolean = false) {
+        Log.d("HomeFragment", "stopTimer called")
+
         changeViewSrc(binding.homeBtnStartAndStop, R.drawable.round_start_24)
         changeViewTag(binding.homeBtnStartAndStop, "start")
 
-        //send intent to StopwatchService to stop the service
-        Intent(StopwatchService.Actions.STOP.name).also {
-            it.setClass(requireContext(), StopwatchService::class.java)
-            requireContext().startService(it)
+        //speak with interface to communicate with main activity and stopwatch service
+        if (stopwatchAlreadyStopped == false) {
+            //be careful when putting stopwatchAlreadyStopped to true, it is also used by resetAction()
+            //stop the stopwatch if it has not been started yet
+            stopwatchControlListener.stopStopwatch()
         }
     }
 
-    private fun startTimer() {
+    private fun startTimer(stopwatchAlreadyStarted: Boolean = false) {
+        Log.d(
+            "HomeFragment",
+            "startTimer called, stopwatchAlreadyStarted: $stopwatchAlreadyStarted"
+        )
+
         changeViewSrc(binding.homeBtnStartAndStop, R.drawable.round_stop_24)
         changeViewTag(binding.homeBtnStartAndStop, "stop")
 
-        //send intent to StopwatchService to start the service
-        Intent(StopwatchService.Actions.START.name).also {
-            it.setClass(requireContext(), StopwatchService::class.java)
-            requireContext().startService(it)
+        //speak with interface to communicate with main activity and stopwatch service
+        if (stopwatchAlreadyStarted == false) {
+            //start the stopwatch if it has not been started yet
+            stopwatchControlListener.startStopwatch()
         }
 
+        updateElapsedTimeDisplay()
     }
 
     private fun resetAction() {
-        stopTimer()
+        stopTimer(true)
         binding.homeTimer.text = timeStringFromLong(0)
+        stopwatchControlListener.resetStopwatch()
     }
 
 
@@ -157,44 +193,20 @@ class HomeFragment : Fragment(), StopwatchServiceListener {
         button.tag = tag
     }
 
+    private fun updateElapsedTimeDisplay() {
+        sharedTimerViewModel.elapsedTimeMillis.observe(viewLifecycleOwner) { elapsedTime ->
+            binding.homeTimer.text = timeStringFromLong(elapsedTime)
+        }
+    }
+
+    private fun updateElapsedTimeDisplay(n: Long) {
+        binding.homeTimer.text = timeStringFromLong(n)
+    }
+
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
 
-        // Unbind from service
-        requireContext().unbindService(serviceConnection)
     }
-
-    override fun onResume() {
-        super.onResume()
-
-        // Bind to service
-        bindToService()
-    }
-
-    // StopwatchServiceListener
-    override fun onElapsedTimeChanged(elapsedTimeMillis: Long) {
-        // Update UI with elapsed time
-        binding.homeTimer.text = timeStringFromLong(elapsedTimeMillis)
-        Log.d("HomeFragment", "Elapsed time: $elapsedTimeMillis")
-    }
-
-    private fun bindToService() {
-        val intent = Intent(requireContext(), StopwatchService::class.java)
-        requireContext().bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
-        Log.d("HomeFragment", "Service bound")
-    }
-
-    private val serviceConnection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            val binder = service as StopwatchService.LocalBinder
-            val stopwatchService = binder.getService()
-            stopwatchService.addListener(this@HomeFragment)
-        }
-
-        override fun onServiceDisconnected(name: ComponentName?) {
-            // Handle service disconnection
-        }
-    }
-
 }

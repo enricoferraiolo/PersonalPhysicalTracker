@@ -40,12 +40,19 @@ class StopwatchService : Service() {
                 //stop the stopwatch
                 stopTimer()
             }
+
+            Actions.RESET.name -> {
+                //reset the stopwatch
+                resetTimer()
+            }
         }
 
         return super.onStartCommand(intent, flags, startId)
     }
 
     private fun startTimer() {
+
+
         isTimerRunning = true
 
         updateNotification("Elapsed time: ${timeStringFromLong(elapsedTimeMillis)}")
@@ -54,10 +61,12 @@ class StopwatchService : Service() {
         handler = Handler(Looper.getMainLooper())
         timerRunnable = object : Runnable {
             override fun run() {
-                elapsedTimeMillis += 1000
-                updateNotification("Elapsed time: ${timeStringFromLong(elapsedTimeMillis)}")
-                updateElapsedTime(elapsedTimeMillis)
-                handler.postDelayed(this, 1000)
+                if (isTimerRunning) {
+                    elapsedTimeMillis += 1000
+                    updateNotification("Elapsed time: ${timeStringFromLong(elapsedTimeMillis)}")
+                    updateElapsedTime(elapsedTimeMillis)
+                    handler.postDelayed(this, 1000)
+                }
             }
         }
         handler.postDelayed(timerRunnable, 1000)
@@ -77,18 +86,16 @@ class StopwatchService : Service() {
     private fun stopTimer() {
         isTimerRunning = false
         handler.removeCallbacks(timerRunnable)
-        updateNotification("Timer stopped")
+        updateNotification("Timer stopped: ${timeStringFromLong(elapsedTimeMillis)}")
     }
 
     private fun resetTimer() {
         isTimerRunning = false
         elapsedTimeMillis = 0
-        updateNotification("Elapsed time: 00:00:00")
+        updateNotification("Elapsed time: ${timeStringFromLong(elapsedTimeMillis)}")
     }
 
     private val NOTIFICATION_ID = 1
-    private var notificationInitialized = false
-    private lateinit var notificationBuilder: NotificationCompat.Builder
     private fun updateNotification(text: String) {
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Physical Activity")
@@ -106,6 +113,9 @@ class StopwatchService : Service() {
     private val listeners = mutableListOf<StopwatchServiceListener>()
 
     fun addListener(listener: StopwatchServiceListener) {
+        //clear listeners list
+        //listeners.removeIf { listener -> true == true }
+
         listeners.add(listener)
     }
 
@@ -114,12 +124,14 @@ class StopwatchService : Service() {
     }
 
     private fun updateElapsedTime(elapsedTimeMillis: Long) {
+        //check if the binding is still active
         listeners.forEach { it.onElapsedTimeChanged(elapsedTimeMillis) }
     }
 
 
     enum class Actions {
         START,
-        STOP
+        STOP,
+        RESET
     }
 }
