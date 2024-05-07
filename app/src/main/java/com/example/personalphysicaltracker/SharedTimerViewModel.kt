@@ -11,12 +11,26 @@ class SharedTimerViewModel : ViewModel() {
     private val _isTimerRunning = MutableLiveData<Boolean>()
     val isTimerRunning: LiveData<Boolean> get() = _isTimerRunning
 
+    private val _startTime = MutableLiveData<Long>()
+    val startTime: LiveData<Long> get() = _startTime
+
+    private val _stoptime = MutableLiveData<Long>()
+    val stoptime: LiveData<Long> get() = _stoptime
+
     fun setElapsedTimeMillis(time: Long) {
         _elapsedTimeMillis.value = time
     }
 
     fun setIsTimerRunning(isRunning: Boolean) {
         _isTimerRunning.value = isRunning
+    }
+
+    fun setStartTime(time: Long) {
+        _startTime.value = time
+    }
+
+    fun setStopTime(time: Long) {
+        _stoptime.value = time
     }
 
 }

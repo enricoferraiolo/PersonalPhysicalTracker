@@ -175,6 +175,7 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
     override fun startStopwatch() {
         Log.e("MainActivity", "isTimerRunning: ${sharedTimerViewModel.isTimerRunning.value}")
         sharedTimerViewModel.setIsTimerRunning(true)
+        sharedTimerViewModel.setStartTime(System.currentTimeMillis())
 
         // Avvia il cronometro nel servizio StopwatchService
         val intent = Intent(this, StopwatchService::class.java)
@@ -183,8 +184,9 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
     }
 
     override fun stopStopwatch() {
+        Log.e("MainActivity", "isTimerRunning: STOPPED")
         sharedTimerViewModel.setIsTimerRunning(false)
-    Log.e("MainActivity", "isTimerRunning: STOPPED")
+        sharedTimerViewModel.setStopTime(System.currentTimeMillis())
 
         // Ferma il cronometro nel servizio StopwatchService
         val intent = Intent(this, StopwatchService::class.java)
@@ -195,6 +197,8 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
     override fun resetStopwatch() {
         sharedTimerViewModel.setIsTimerRunning(false)
         sharedTimerViewModel.setElapsedTimeMillis(0)
+        sharedTimerViewModel.setStartTime(0)
+        sharedTimerViewModel.setStopTime(0)
 
         // Resetta il cronometro nel servizio StopwatchService
         val intent = Intent(this, StopwatchService::class.java)

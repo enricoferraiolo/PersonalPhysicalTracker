@@ -24,6 +24,8 @@ class StopwatchService : Service() {
     }
 
     private var isTimerRunning = false
+    private var startTime = 0L
+    private var stopTime = 0L
     private var elapsedTimeMillis: Long = 0
     private lateinit var timerRunnable: Runnable
     private lateinit var handler: Handler
@@ -51,9 +53,8 @@ class StopwatchService : Service() {
     }
 
     private fun startTimer() {
-
-
         isTimerRunning = true
+        startTime = System.currentTimeMillis()
 
         updateNotification("Elapsed time: ${timeStringFromLong(elapsedTimeMillis)}")
         updateElapsedTime(elapsedTimeMillis)
@@ -85,12 +86,15 @@ class StopwatchService : Service() {
 
     private fun stopTimer() {
         isTimerRunning = false
+        stopTime = System.currentTimeMillis()
         handler.removeCallbacks(timerRunnable)
         updateNotification("Timer stopped: ${timeStringFromLong(elapsedTimeMillis)}")
     }
 
     private fun resetTimer() {
         isTimerRunning = false
+        startTime = 0L
+        stopTime = 0L
         elapsedTimeMillis = 0
         updateNotification("Elapsed time: ${timeStringFromLong(elapsedTimeMillis)}")
     }

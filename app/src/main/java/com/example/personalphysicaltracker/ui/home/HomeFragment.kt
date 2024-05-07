@@ -16,6 +16,9 @@ import com.example.personalphysicaltracker.R
 import com.example.personalphysicaltracker.SharedTimerViewModel
 import com.example.personalphysicaltracker.StopwatchControlListener
 import com.example.personalphysicaltracker.data.ActivitiesListViewModel
+import com.example.personalphysicaltracker.data.ActivitiesViewModel
+import com.example.personalphysicaltracker.data.Activity
+import com.example.personalphysicaltracker.data.ExtraInfo
 import com.example.personalphysicaltracker.data.UserViewModel
 import com.example.personalphysicaltracker.databinding.FragmentHomeBinding
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -27,7 +30,9 @@ class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
 
-    private lateinit var activitiesListViewModel: ActivitiesListViewModel
+    private lateinit var activitiesListViewModel: ActivitiesListViewModel //activities list view model
+
+    private lateinit var activitiesViewModel: ActivitiesViewModel //activities registered view model
 
     private lateinit var stopwatchControlListener: StopwatchControlListener
 
@@ -74,6 +79,11 @@ class HomeFragment : Fragment() {
             spinner.adapter = adapter
         }
 
+        //activities view model
+        activitiesViewModel = ViewModelProvider(this).get(ActivitiesViewModel::class.java)
+
+        //user view model
+        userViewModel = ViewModelProvider(this).get(UserViewModel::class.java)
 
         //btn start activity onclicklister
         binding.homeBtnStartAndStop.setOnClickListener {
@@ -85,6 +95,18 @@ class HomeFragment : Fragment() {
         binding.homeBtnReset.setOnClickListener {
             //reset timer
             resetAction()
+        }
+
+        //btn register activity onclicklistener
+        binding.homeBtnRegisterActivity.setOnClickListener {
+            //register activity
+            val selectedActivity = spinner.selectedItem.toString()
+            registerActivity(selectedActivity)
+        }
+
+        //log all activities registered
+        activitiesViewModel.readAllData.observe(viewLifecycleOwner) { activities ->
+            Log.d("HomeFragment", "Activities registered: $activities")
         }
 
 
@@ -121,6 +143,47 @@ class HomeFragment : Fragment() {
         }
 
         return root
+    }
+
+    private fun registerActivity(selectedActivityName: String) {
+        //register activity
+        activitiesListViewModel.readAllData.observe(viewLifecycleOwner) { activities ->
+            val selectedActivity = activities.find { it.name == selectedActivityName }
+            if (selectedActivity != null) {
+                //activity found
+                //get elapsed time
+                val elapsedTime = sharedTimerViewModel.elapsedTimeMillis.value ?: 0
+                val startTime = sharedTimerViewModel.startTime.value ?: 0
+                val stopTime = sharedTimerViewModel.stoptime.value ?: 0
+
+                //check if time elapsed is greater than 0, if so, register activity
+                if (elapsedTime > 0) {
+                    //register activity
+                    activitiesViewModel.addActivity(
+                        Activity(
+                            0,
+                            userViewModel.readAllData.value?.get(0)?.id ?: 0,
+                            selectedActivity.id,
+                            startTime,
+                            stopTime,
+                            ExtraInfo(
+                                selectedActivity.extra?.stepsSelector ?: false,
+                                selectedActivity.extra?.metersSelector ?: false,
+                                selectedActivity.extra?.steps ?: 0,
+                                selectedActivity.extra?.meters ?: 0
+                            )
+                        )
+                    )
+
+                    //reset timer
+                    resetAction()
+                } else {
+                    Log.d("HomeFragment", "No time elapsed ")
+                }
+            } else {
+                Log.d("HomeFragment", "No activity selected ")
+            }
+        }
     }
 
 

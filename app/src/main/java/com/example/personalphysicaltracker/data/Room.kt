@@ -72,6 +72,6 @@ data class Activity(
     val userId: Int,
     val activityId: Int,
     val startTime: Long,
-    val finishTime: Long,
+    val stopTime: Long,
     val extra: ExtraInfo?
 )
