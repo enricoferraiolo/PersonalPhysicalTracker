@@ -28,4 +28,10 @@
         android:name="com.example.personalphysicaltracker.ui.manageActivitylist.ManageActivitylist"
         android:label="fragment_manageActivityList"
         tools:layout="@layout/fragment_manage_activitylist" />
+    <fragment
+        android:id="@+id/calendarFragment"
+        android:name="com.example.personalphysicaltracker.CalendarFragment"
+        android:label="fragment_calendar"
+        tools:layout="@layout/fragment_calendar" />
+
 </navigation>

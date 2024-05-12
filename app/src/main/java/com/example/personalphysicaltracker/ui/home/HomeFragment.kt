@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Spinner
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -177,6 +178,10 @@ class HomeFragment : Fragment() {
 
                     //reset timer
                     resetAction()
+
+                    //toast
+                    Toast.makeText(requireContext(), "Activity registered!", Toast.LENGTH_LONG).show()
+
                 } else {
                     Log.d("HomeFragment", "No time elapsed ")
                 }

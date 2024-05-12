@@ -17,8 +17,13 @@
             android:icon="@drawable/outline_format_list_bulleted_24"
             android:title="Manage activity list" />
         <item
+            android:id="@+id/calendarFragment"
+            android:icon="@drawable/round_calendar_month_24"
+            android:title="Calendar" />
+        <item
             android:id="@+id/nav_info"
             android:icon="@drawable/baseline_info_24"
             android:title="@string/menu_info" />
+
     </group>
 </menu>
