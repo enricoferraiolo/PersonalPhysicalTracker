@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.personalphysicaltracker"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -28,6 +28,7 @@ android {
         }
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
@@ -55,6 +56,9 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.androidx.material3.android)
     implementation(libs.androidx.work.runtime.ktx)
+    //implementation(libs.desugar.jdk.libs)
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
+    implementation(libs.view)
     kapt("androidx.room:room-compiler:2.6.1")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

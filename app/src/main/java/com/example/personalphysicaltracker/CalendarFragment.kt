@@ -6,12 +6,16 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.personalphysicaltracker.databinding.FragmentCalendarBinding
+import com.kizitonwose.calendar.core.CalendarDay
+import com.kizitonwose.calendar.core.firstDayOfWeekFromLocale
+import com.kizitonwose.calendar.view.MonthDayBinder
 import java.text.SimpleDateFormat
+import java.time.YearMonth
 import java.util.Calendar
 import java.util.Locale
 
 
-class CalendarFragment : Fragment(), DatePickerFragment.OnDateSetListener {
+class CalendarFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,24 +33,36 @@ class CalendarFragment : Fragment(), DatePickerFragment.OnDateSetListener {
         _binding = FragmentCalendarBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        binding.btnPickDate.setOnClickListener { view ->
-            val newFragment = DatePickerFragment()
-            newFragment.listener = this
-            newFragment.show(parentFragmentManager, "datePicker")
-        }
 
-        // Imposta la data odierna nel TextView
+        // Set the current date as the default date
         val calendar = Calendar.getInstance()
         val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
         val todayDate = dateFormat.format(calendar.time)
         binding.tvSelectedDate.text = todayDate
 
-        return root
-    }
+        // Set the calendar view
+        val calendarView = binding.calendarView
 
-    override fun onDateSet(year: Int, month: Int, day: Int) {
-        val selectedDate = "$day/${month + 1}/$year"
-        binding.tvSelectedDate.text = selectedDate
+        calendarView.dayBinder = object : MonthDayBinder<DayViewContainer> {
+            // Called only when a new container is needed.
+            override fun create(view: View) = DayViewContainer(view)
+
+            // Called every time we need to reuse a container.
+            override fun bind(container: DayViewContainer, data: CalendarDay) {
+                container.textView.text = data.date.dayOfMonth.toString()
+            }
+        }
+
+        //CalendarView setup
+        val currentMonth = YearMonth.now()
+        val startMonth = currentMonth.minusMonths(100)  // Adjust as needed
+        val endMonth = currentMonth.plusMonths(100)  // Adjust as needed
+        val firstDayOfWeek = firstDayOfWeekFromLocale() // Available from the library
+        calendarView.setup(startMonth, endMonth, firstDayOfWeek)
+        calendarView.scrollToMonth(currentMonth)
+
+
+        return root
     }
 
     override fun onDestroyView() {
