@@ -7,10 +7,11 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.personalphysicaltracker.databinding.FragmentCalendarBinding
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Locale
 
 
-class CalendarFragment : Fragment() {
+class CalendarFragment : Fragment(), DatePickerFragment.OnDateSetListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,14 +29,28 @@ class CalendarFragment : Fragment() {
         _binding = FragmentCalendarBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val calendarView = binding.calendarView
-        val dateStr = "06/05/2024"
-        val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-        val date = sdf.parse(dateStr)
-        date?.time?.let { calendarView.date = it }
+        binding.btnPickDate.setOnClickListener { view ->
+            val newFragment = DatePickerFragment()
+            newFragment.listener = this
+            newFragment.show(parentFragmentManager, "datePicker")
+        }
+
+        // Imposta la data odierna nel TextView
+        val calendar = Calendar.getInstance()
+        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        val todayDate = dateFormat.format(calendar.time)
+        binding.tvSelectedDate.text = todayDate
 
         return root
     }
 
+    override fun onDateSet(year: Int, month: Int, day: Int) {
+        val selectedDate = "$day/${month + 1}/$year"
+        binding.tvSelectedDate.text = selectedDate
+    }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }
