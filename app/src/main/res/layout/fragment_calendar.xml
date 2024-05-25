@@ -27,10 +27,9 @@
                     android:id="@+id/weekCalendarView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:cv_dayViewResource="@layout/calendar_day_layout"
                     app:cv_daySize="seventhWidth"
-                    app:cv_orientation="horizontal"
-                   />
+                    app:cv_dayViewResource="@layout/calendar_day_layout"
+                    app:cv_orientation="horizontal" />
 
             </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -40,15 +39,10 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <TextView
-                android:id="@+id/tv_selectedDate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="GIORNO"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvDayActivities"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
 

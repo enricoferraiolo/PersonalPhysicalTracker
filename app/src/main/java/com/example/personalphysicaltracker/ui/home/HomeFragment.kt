@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.Toast
@@ -79,6 +80,18 @@ class HomeFragment : Fragment() {
             spinner.adapter = adapter
         }
 
+        // Set OnItemSelectedListener for the spinner
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                // Call resetAction() when a new item is selected
+                resetAction()
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {
+                // No action needed here
+            }
+        }
+
         //activities view model
         activitiesViewModel = ViewModelProvider(this).get(ActivitiesViewModel::class.java)
 
@@ -146,6 +159,9 @@ class HomeFragment : Fragment() {
     }
 
     private fun registerActivity(selectedActivityName: String) {
+        //stop timer
+        stopTimer(false)
+
         //register activity
         activitiesListViewModel.readAllData.observe(viewLifecycleOwner) { activities ->
             val selectedActivity = activities.find { it.name == selectedActivityName }

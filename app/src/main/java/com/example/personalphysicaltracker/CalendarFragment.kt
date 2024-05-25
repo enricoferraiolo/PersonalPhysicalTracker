@@ -10,6 +10,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.personalphysicaltracker.data.ActivitiesList
+import com.example.personalphysicaltracker.data.ActivitiesListViewModel
 import com.example.personalphysicaltracker.data.ActivitiesViewModel
 import com.example.personalphysicaltracker.databinding.CalendarDayLayoutBinding
 import com.example.personalphysicaltracker.databinding.FragmentCalendarBinding
@@ -48,6 +52,7 @@ class CalendarFragment : Fragment() {
     private val fullDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
 
 
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -69,7 +74,7 @@ class CalendarFragment : Fragment() {
                         binding.weekCalendarView.notifyDateChanged(day.date)
                         oldDate?.let { binding.weekCalendarView.notifyDateChanged(it) }
 
-                        binding.tvSelectedDate.text = fullDateFormatter.format(day.date).toString()
+                       //binding.tvSelectedDate.text = fullDateFormatter.format(day.date).toString()
                         //load the activities for the day
                         loadDayActivities(day.date)
                     }
@@ -107,11 +112,31 @@ class CalendarFragment : Fragment() {
         // Setup the calendar view
         setupCalendar()
 
+        //recyclerview
+       // val adapter = CalendarDayAdapter()
+        val recyclerView = binding.rvDayActivities
+       // recyclerView.adapter = adapter
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+
+        //view model
+        val activitiesViewModel = ViewModelProvider(this).get(ActivitiesViewModel::class.java)
+        val activitiesListViewModel = ViewModelProvider(this).get(ActivitiesListViewModel::class.java)
+
+        activitiesViewModel.readAllData.observe(viewLifecycleOwner) { activities ->
+            activitiesListViewModel.readAllData.observe(viewLifecycleOwner) { activitiesList ->
+                val adapter = CalendarDayAdapter(activities, activitiesList)
+                recyclerView.adapter = adapter
+            }
+        }
+
+
+        //TODO: separate activites for each day: an activity a is shown in a certain day d iff a.startTime is in d-1 and a.stopTime is in d. viceversa for a.stopTime in d+1 and a.startTime in d
+
         return root
     }
 
     private fun initializeDefaultDate() {
-        binding.tvSelectedDate.text = fullDateFormatter.format(selectedDate)
+        //binding.tvSelectedDate.text = fullDateFormatter.format(selectedDate)
         loadDayActivities(selectedDate)
     }
 
