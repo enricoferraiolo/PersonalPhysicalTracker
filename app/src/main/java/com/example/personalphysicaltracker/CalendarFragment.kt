@@ -64,7 +64,7 @@ class CalendarFragment : Fragment() {
                         oldDate?.let { binding.weekCalendarView.notifyDateChanged(it) }
 
                         //binding.tvSelectedDate.text = fullDateFormatter.format(day.date).toString()
-                        adapter.updateSelectedDate(day.date)
+                        adapter.updateData(day.date)
                         //load the activities for the day
                         loadDayActivities(day.date)
                     }
@@ -153,5 +153,25 @@ class CalendarFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun timeStringFromLong(elapsedTimeMillis: Long, showSeconds: Boolean): String {
+        val seconds = (elapsedTimeMillis / 1000) % 60
+        val minutes = (elapsedTimeMillis / (1000 * 60) % 60)
+        val hours = (elapsedTimeMillis / (1000 * 60 * 60) % 24)
+        return makeTimeString(hours, minutes, seconds, showSeconds)
+    }
+
+    private fun makeTimeString(
+        hours: Long,
+        minutes: Long,
+        seconds: Long,
+        showSeconds: Boolean
+    ): String {
+        return if (showSeconds) {
+            String.format("%02d:%02d:%02d", hours, minutes, seconds)
+        } else {
+            String.format("%02d:%02d", hours, minutes)
+        }
     }
 }
