@@ -1,16 +1,32 @@
 package com.example.personalphysicaltracker
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.children
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import com.example.personalphysicaltracker.data.ActivitiesViewModel
+import com.example.personalphysicaltracker.databinding.CalendarDayLayoutBinding
 import com.example.personalphysicaltracker.databinding.FragmentCalendarBinding
 import com.kizitonwose.calendar.core.CalendarDay
+import com.kizitonwose.calendar.core.WeekDay
+import com.kizitonwose.calendar.core.atStartOfMonth
+import com.kizitonwose.calendar.core.daysOfWeek
 import com.kizitonwose.calendar.core.firstDayOfWeekFromLocale
 import com.kizitonwose.calendar.view.MonthDayBinder
+import com.kizitonwose.calendar.view.ViewContainer
+import com.kizitonwose.calendar.view.WeekDayBinder
 import java.text.SimpleDateFormat
+import java.time.DayOfWeek
+import java.time.LocalDate
 import java.time.YearMonth
+import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
 import java.util.Calendar
 import java.util.Locale
 
@@ -26,43 +42,99 @@ class CalendarFragment : Fragment() {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
+
+    private var selectedDate = LocalDate.now()
+    private val weekDateFormatter = DateTimeFormatter.ofPattern("dd")
+    private val fullDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentCalendarBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
+        initializeDefaultDate()
 
-        // Set the current date as the default date
-        val calendar = Calendar.getInstance()
-        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-        val todayDate = dateFormat.format(calendar.time)
-        binding.tvSelectedDate.text = todayDate
+        class DayViewContainer(view: View) : ViewContainer(view) {
+            val bind = CalendarDayLayoutBinding.bind(view)
+            lateinit var day: WeekDay
 
-        // Set the calendar view
-        val calendarView = binding.calendarView
+            init {
+                view.setOnClickListener {
+                    if (selectedDate != day.date) {
+                        val oldDate = selectedDate
+                        selectedDate = day.date
+                        binding.weekCalendarView.notifyDateChanged(day.date)
+                        oldDate?.let { binding.weekCalendarView.notifyDateChanged(it) }
 
-        calendarView.dayBinder = object : MonthDayBinder<DayViewContainer> {
-            // Called only when a new container is needed.
-            override fun create(view: View) = DayViewContainer(view)
-
-            // Called every time we need to reuse a container.
-            override fun bind(container: DayViewContainer, data: CalendarDay) {
-                container.textView.text = data.date.dayOfMonth.toString()
+                        binding.tvSelectedDate.text = fullDateFormatter.format(day.date).toString()
+                        //load the activities for the day
+                        loadDayActivities(day.date)
+                    }
+                }
             }
+
+            fun bind(day: WeekDay) {
+                this.day = day
+                bind.calendarDateText.text = weekDateFormatter.format(day.date)
+                bind.calendarDayText.text = day.date.dayOfWeek.displayText()
+
+                val colorRes = if (day.date == selectedDate) {
+                    R.color.purple_200
+                } else {
+                    R.color.black
+                }
+                bind.calendarDateText.setTextColor(view.context.getColorCompat(colorRes))
+                bind.calendarDayText.setTextColor(view.context.getColorCompat(colorRes))
+                bind.exSevenSelectedView.isVisible = day.date == selectedDate
+            }
+
+
         }
 
-        //CalendarView setup
-        val currentMonth = YearMonth.now()
-        val startMonth = currentMonth.minusMonths(100)  // Adjust as needed
-        val endMonth = currentMonth.plusMonths(100)  // Adjust as needed
-        val firstDayOfWeek = firstDayOfWeekFromLocale() // Available from the library
-        calendarView.setup(startMonth, endMonth, firstDayOfWeek)
-        calendarView.scrollToMonth(currentMonth)
+        binding.weekCalendarView.dayBinder = object : WeekDayBinder<DayViewContainer> {
+            override fun create(view: View) = DayViewContainer(view)
+            override fun bind(container: DayViewContainer, data: WeekDay) = container.bind(data)
+        }
 
+        binding.weekCalendarView.weekScrollListener = { weekDays ->
+            //change fragment label
+            (activity as? AppCompatActivity)?.supportActionBar?.title = getWeekPageTitle(weekDays)
+        }
+
+        // Setup the calendar view
+        setupCalendar()
 
         return root
+    }
+
+    private fun initializeDefaultDate() {
+        binding.tvSelectedDate.text = fullDateFormatter.format(selectedDate)
+        loadDayActivities(selectedDate)
+    }
+
+    private fun loadDayActivities(date: LocalDate) {
+        //TODO("Not yet implemented")
+    }
+
+    private fun setupCalendar() {
+        val currentMonth = YearMonth.now()
+
+        val monthsToSubstract = 0
+
+        //we need to get the first ever activity record registered in the database
+        //and get the month and year of that record
+        //then we will use that month and year to set the start of the calendar
+
+
+        binding.weekCalendarView.setup(
+            currentMonth.minusMonths(5).atStartOfMonth(),
+            currentMonth.plusMonths(0).atEndOfMonth(),
+            firstDayOfWeekFromLocale(),
+        )
+        binding.weekCalendarView.scrollToDate(LocalDate.now())
     }
 
     override fun onDestroyView() {
