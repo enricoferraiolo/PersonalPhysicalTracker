@@ -1,18 +1,22 @@
 package com.example.personalphysicaltracker
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextClock
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.personalphysicaltracker.data.ActivitiesList
 import com.example.personalphysicaltracker.data.Activity
-import com.example.personalphysicaltracker.ui.manageActivitylist.ActivitiesListAdapter
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
 
 class CalendarDayAdapter(
     private val activities: List<Activity>,
-    private val activitiesList: List<ActivitiesList>
+    private val activitiesList: List<ActivitiesList>,
+    private var selectedDate: LocalDate //yyyy-MM-dd
 ) : RecyclerView.Adapter<CalendarDayAdapter.MyViewHolder>() {
     //private var activities = emptyList<Activity>()
     private val activityIdToNameMap: Map<Int, String> =
@@ -35,21 +39,72 @@ class CalendarDayAdapter(
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         val currentitem = activities[position]
+
+        holder.itemView.visibility = View.VISIBLE
+
         val idTextView =
             holder.itemView.findViewById<com.google.android.material.textview.MaterialTextView>(R.id.id_list_day_calendar_row)
-        idTextView.text = currentitem.id.toString()
         val nameTextView =
             holder.itemView.findViewById<com.google.android.material.textview.MaterialTextView>(R.id.name_day_calendar_row)
         val activityName = activityIdToNameMap[currentitem.activityId]
-        nameTextView.text = activityName ?: "Unknown Activity"
         val tcStart =
             holder.itemView.findViewById<TextView>(R.id.tc_start_time_day_calendar_row)
         val tcEnd =
             holder.itemView.findViewById<TextView>(R.id.tc_end_time_day_calendar_row)
 
-        tcStart.text = timeStringFromLong(currentitem.startTime, true)
-        tcEnd.text = timeStringFromLong(currentitem.stopTime, true)
+        //check if activity has been registered for the day
+        //an activity is DISPLAYED IFF given day D and activity A, there is an entry in the database
+        //s.t. A.startTime is in D and A.stopTime is in D OR A.startTime is in D-1 and A.stopTime is in D OR A.startTime is in D and A.stopTime is in D+1
 
+// Check if activity has been registered for the day
+        val activityStartDate = currentitem.startTime
+        val activityEndDate = currentitem.stopTime
+
+        val selectedDateStartMillis =
+            selectedDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli()
+        val selectedDateEndMillis =
+            selectedDate.plusDays(1).atStartOfDay().toInstant(java.time.ZoneOffset.UTC)
+                .toEpochMilli()
+
+        val activityRegisteredForSelectedDay =
+            (activityStartDate in selectedDateStartMillis until selectedDateEndMillis) ||
+                    (activityEndDate in selectedDateStartMillis until selectedDateEndMillis)
+
+        if (activityRegisteredForSelectedDay) {
+            idTextView.text = currentitem.id.toString()
+            nameTextView.text = activityName ?: "Unknown Activity"
+            tcStart.text = timeStringFromLong(currentitem.startTime, true)
+            tcEnd.text = timeStringFromLong(currentitem.stopTime, true)
+        } else {
+            holder.itemView.visibility =
+                View.GONE // Hide the item if activity is not registered for the selected day
+        }
+    }
+
+    fun updateSelectedDate(newDate: LocalDate) {
+        selectedDate = newDate
+        notifyDataSetChanged()
+    }
+
+    private fun getYear(time: Long): String {
+        val date = java.time.Instant.ofEpochMilli(time)
+            .atZone(java.time.ZoneId.systemDefault())
+            .toLocalDate()
+        return date.year.toString()
+    }
+
+    private fun getMonth(time: Long): String {
+        val date = java.time.Instant.ofEpochMilli(time)
+            .atZone(java.time.ZoneId.systemDefault())
+            .toLocalDate()
+        return date.monthValue.toString()
+    }
+
+    private fun getDay(time: Long): String {
+        val date = java.time.Instant.ofEpochMilli(time)
+            .atZone(java.time.ZoneId.systemDefault())
+            .toLocalDate()
+        return date.dayOfMonth.toString()
     }
 
     private fun timeStringFromLong(elapsedTimeMillis: Long, showSeconds: Boolean): String {

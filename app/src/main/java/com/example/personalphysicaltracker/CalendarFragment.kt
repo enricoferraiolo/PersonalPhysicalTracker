@@ -1,13 +1,10 @@
 package com.example.personalphysicaltracker
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -15,24 +12,17 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.personalphysicaltracker.data.ActivitiesList
 import com.example.personalphysicaltracker.data.ActivitiesListViewModel
 import com.example.personalphysicaltracker.data.ActivitiesViewModel
+import com.example.personalphysicaltracker.data.Activity
 import com.example.personalphysicaltracker.databinding.CalendarDayLayoutBinding
 import com.example.personalphysicaltracker.databinding.FragmentCalendarBinding
-import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.WeekDay
 import com.kizitonwose.calendar.core.atStartOfMonth
-import com.kizitonwose.calendar.core.daysOfWeek
 import com.kizitonwose.calendar.core.firstDayOfWeekFromLocale
-import com.kizitonwose.calendar.view.MonthDayBinder
 import com.kizitonwose.calendar.view.ViewContainer
 import com.kizitonwose.calendar.view.WeekDayBinder
-import java.text.SimpleDateFormat
-import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
-import java.time.format.TextStyle
-import java.util.Calendar
-import java.util.Locale
 
 
 class CalendarFragment : Fragment() {
@@ -50,8 +40,7 @@ class CalendarFragment : Fragment() {
     private var selectedDate = LocalDate.now()
     private val weekDateFormatter = DateTimeFormatter.ofPattern("dd")
     private val fullDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-
-
+    private lateinit var adapter: CalendarDayAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -74,7 +63,8 @@ class CalendarFragment : Fragment() {
                         binding.weekCalendarView.notifyDateChanged(day.date)
                         oldDate?.let { binding.weekCalendarView.notifyDateChanged(it) }
 
-                       //binding.tvSelectedDate.text = fullDateFormatter.format(day.date).toString()
+                        //binding.tvSelectedDate.text = fullDateFormatter.format(day.date).toString()
+                        adapter.updateSelectedDate(day.date)
                         //load the activities for the day
                         loadDayActivities(day.date)
                     }
@@ -113,24 +103,22 @@ class CalendarFragment : Fragment() {
         setupCalendar()
 
         //recyclerview
-       // val adapter = CalendarDayAdapter()
+        // val adapter = CalendarDayAdapter()
         val recyclerView = binding.rvDayActivities
-       // recyclerView.adapter = adapter
+        // recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         //view model
         val activitiesViewModel = ViewModelProvider(this).get(ActivitiesViewModel::class.java)
-        val activitiesListViewModel = ViewModelProvider(this).get(ActivitiesListViewModel::class.java)
+        val activitiesListViewModel =
+            ViewModelProvider(this).get(ActivitiesListViewModel::class.java)
 
         activitiesViewModel.readAllData.observe(viewLifecycleOwner) { activities ->
             activitiesListViewModel.readAllData.observe(viewLifecycleOwner) { activitiesList ->
-                val adapter = CalendarDayAdapter(activities, activitiesList)
+                adapter = CalendarDayAdapter(activities, activitiesList, selectedDate)
                 recyclerView.adapter = adapter
             }
         }
-
-
-        //TODO: separate activites for each day: an activity a is shown in a certain day d iff a.startTime is in d-1 and a.stopTime is in d. viceversa for a.stopTime in d+1 and a.startTime in d
 
         return root
     }
