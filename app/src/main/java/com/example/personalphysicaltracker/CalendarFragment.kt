@@ -1,6 +1,7 @@
 package com.example.personalphysicaltracker
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,6 +9,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.personalphysicaltracker.data.ActivitiesList
@@ -24,6 +27,7 @@ import com.kizitonwose.calendar.view.WeekDayBinder
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 
 class CalendarFragment : Fragment() {
@@ -116,7 +120,7 @@ class CalendarFragment : Fragment() {
         }
 
         // Setup the calendar view
-        setupCalendar()
+        setupCalendar(activitiesViewModel)
 
         //recyclerview
         // val adapter = CalendarDayAdapter()
@@ -145,22 +149,56 @@ class CalendarFragment : Fragment() {
         //TODO("Not yet implemented")
     }
 
-    private fun setupCalendar() {
+    private fun setupCalendar(activitiesViewModel: ActivitiesViewModel) {
         val currentMonth = YearMonth.now()
 
-        val monthsToSubstract = 0
+        var monthsToSubstract: Long = 0
+        var monthsToAdd: Long = 0
+
 
         //we need to get the first ever activity record registered in the database
         //and get the month and year of that record
         //then we will use that month and year to set the start of the calendar
+        val combinedLiveData = MediatorLiveData<Pair<Activity?, Activity?>>().apply {
+            var firstActivity: Activity? = null
+            var latestActivity: Activity? = null
+
+            addSource(activitiesViewModel.getFirstActivity()) { activity ->
+                firstActivity = activity
+                value = firstActivity to latestActivity
+            }
+
+            addSource(activitiesViewModel.getLatestActivity()) { activity ->
+                latestActivity = activity
+                value = firstActivity to latestActivity
+            }
+        }
+
+        combinedLiveData.observe(viewLifecycleOwner, Observer { (firstActivity, latestActivity) ->
+            if (firstActivity != null && latestActivity != null) {
+                val startMonth = YearMonth.of(getYear(firstActivity.startTime).toInt(), getMonth(firstActivity.startTime).toInt())
+                val endMonth = YearMonth.of(getYear(latestActivity.stopTime).toInt(), getMonth(latestActivity.stopTime).toInt())
+
+                val monthsToSubtract = ChronoUnit.MONTHS.between(startMonth, currentMonth).coerceAtLeast(0)
+                val monthsToAdd = ChronoUnit.MONTHS.between(currentMonth, endMonth).coerceAtLeast(0)
 
 
-        binding.weekCalendarView.setup(
-            currentMonth.minusMonths(5).atStartOfMonth(),
-            currentMonth.plusMonths(0).atEndOfMonth(),
-            firstDayOfWeekFromLocale(),
-        )
-        binding.weekCalendarView.scrollToDate(LocalDate.now())
+
+                Log.d(
+                    "CalendarFragment",
+                    "Months to subtract: $monthsToSubtract, months to add: $monthsToAdd"
+                )
+
+                binding.weekCalendarView.setup(
+                    currentMonth.minusMonths(monthsToSubtract).atStartOfMonth(),
+                    currentMonth.plusMonths(monthsToAdd).atEndOfMonth(),
+                    firstDayOfWeekFromLocale()
+                )
+                binding.weekCalendarView.scrollToDate(LocalDate.now())
+            }
+
+        })
+
     }
 
     override fun onDestroyView() {

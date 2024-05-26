@@ -43,4 +43,12 @@ class ActivitiesRepository(private val activitiesDao: ActivitiesDao) {
     suspend fun addActivity(activity: Activity) {
         activitiesDao.addActivity(activity)
     }
+
+    fun getFirstActivity(): LiveData<Activity?> {
+        return activitiesDao.getFirstActivity()
+    }
+
+    fun getLatestActivity(): LiveData<Activity?> {
+        return activitiesDao.getLatestActivity()
+    }
 }

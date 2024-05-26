@@ -48,4 +48,10 @@ interface ActivitiesDao {
 
     @Query("SELECT * FROM activities_table ORDER BY startTime ASC")
     fun readAllData(): LiveData<List<Activity>>
+
+    @Query("SELECT * FROM activities_table ORDER BY startTime ASC LIMIT 1")
+    fun getFirstActivity(): LiveData<Activity?>
+
+    @Query("SELECT * FROM activities_table ORDER BY stopTime DESC LIMIT 1")
+    fun getLatestActivity(): LiveData<Activity?>
 }
