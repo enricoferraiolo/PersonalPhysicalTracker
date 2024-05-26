@@ -132,10 +132,17 @@ class CalendarFragment : Fragment() {
         //load the activities from the database in the recyclerview
         activitiesViewModel.readAllData.observe(viewLifecycleOwner) { activities ->
             activitiesListViewModel.readAllData.observe(viewLifecycleOwner) { activitiesList ->
-
-                adapter = CalendarDayAdapter(activities, activitiesList, selectedDate)
-                recyclerView.adapter = adapter
-
+                //check if activities is not empty
+                if (activities.isNotEmpty()) {
+                    //check if activitiesList is not empty
+                    if (activitiesList.isNotEmpty()) {
+                        adapter = CalendarDayAdapter(activities, activitiesList, selectedDate)
+                        recyclerView.adapter = adapter
+                        binding.tvNoActivities.isVisible = false
+                    }
+                }else{
+                    binding.tvNoActivities.isVisible = true
+                }
             }
         }
 
