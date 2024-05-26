@@ -50,7 +50,8 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(
-                    android.Manifest.permission.POST_NOTIFICATIONS
+                    android.Manifest.permission.POST_NOTIFICATIONS,
+                    android.Manifest.permission.ACTIVITY_RECOGNITION
                 ),
                 0
             )

@@ -1,14 +1,17 @@
 package com.example.personalphysicaltracker
 
+import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.personalphysicaltracker.data.ActivitiesList
 import com.example.personalphysicaltracker.data.Activity
 import com.example.personalphysicaltracker.data.ExtraInfo
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.time.LocalDate
 
 class CalendarDayAdapter(
@@ -44,8 +47,8 @@ class CalendarDayAdapter(
 
         holder.itemView.visibility = View.VISIBLE
 
-        val idTextView =
-            holder.itemView.findViewById<com.google.android.material.textview.MaterialTextView>(R.id.id_list_day_calendar_row)
+       // val idTextView =
+           // holder.itemView.findViewById<com.google.android.material.textview.MaterialTextView>(R.id.id_list_day_calendar_row)
         val nameTextView =
             holder.itemView.findViewById<com.google.android.material.textview.MaterialTextView>(R.id.name_day_calendar_row)
         val activityName = activityIdToNameMap[currentitem.activityId]
@@ -53,7 +56,7 @@ class CalendarDayAdapter(
             holder.itemView.findViewById<com.google.android.material.textview.MaterialTextView>(R.id.tc_time_day_calendar_row)
 
 
-        idTextView.text = currentitem.id.toString()
+       // idTextView.text = currentitem.id.toString()
 
         if (activityName != null) {
             nameTextView.text = activityName
@@ -67,6 +70,7 @@ class CalendarDayAdapter(
                 null,
                 android.graphics.Typeface.ITALIC
             ) // Italic font for unknown activities
+
         }
 
         var startTimeString = ""
@@ -118,7 +122,15 @@ class CalendarDayAdapter(
                 android.graphics.Typeface.BOLD
             )
         }
+
+        // Set click listener to show a Toast with the activity name
+        holder.itemView.setOnClickListener {
+            val context: Context = it.context
+            Toast.makeText(context, "Activity: ${nameTextView.text}", Toast.LENGTH_SHORT).show()
+        }
     }
+
+
 
     /*
     every day must be covered with activities, if there are no activities, fill with a dummy activity that has a start time of 00:00:00 and an end time of 23:59:59

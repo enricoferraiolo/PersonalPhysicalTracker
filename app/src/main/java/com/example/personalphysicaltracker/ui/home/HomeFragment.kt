@@ -1,6 +1,8 @@
 package com.example.personalphysicaltracker.ui.home
 
 import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -12,6 +14,9 @@ import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.compose.ui.input.pointer.PointerIcon.Companion.Text
+import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.personalphysicaltracker.R
@@ -158,6 +163,14 @@ class HomeFragment : Fragment() {
             if (users.isNotEmpty()) {
                 binding.homeTvWelcome.text = "Welcome, ${users[0].name}!"
             }
+        }
+
+        val sensorManager = ContextCompat.getSystemService(requireContext(), SensorManager::class.java)
+        val sensor: Sensor? = sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+
+
+        if (sensor == null) {
+            Toast.makeText(requireContext(), "No step counter sensor!", Toast.LENGTH_LONG).show()
         }
 
         return root
