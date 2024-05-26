@@ -125,7 +125,7 @@ class HomeFragment : Fragment() {
         //btn register activity onclicklistener
         binding.homeBtnRegisterActivity.setOnClickListener {
             //check if timer is running
-            if (binding.homeBtnStartAndStop.tag == "start") {
+            if (binding.homeTimer.text == "00:00:00") {
                 Toast.makeText(
                     requireContext(),
                     "Start the timer before registering an activity!",
@@ -139,12 +139,6 @@ class HomeFragment : Fragment() {
             registerActivity(selectedActivity)
         }
 
-        //log all activities registered
-        activitiesViewModel.readAllData.observe(viewLifecycleOwner) { activities ->
-            Log.d("HomeFragment", "Activities registered: $activities")
-        }
-
-
         //SharedTimerViewModel
         sharedTimerViewModel =
             ViewModelProvider(requireActivity()).get(SharedTimerViewModel::class.java)
@@ -156,17 +150,6 @@ class HomeFragment : Fragment() {
                 startTimer(true)
             }
         }
-        /*sharedTimerViewModel.isTimerRunning.observe(viewLifecycleOwner) { isRunning ->
-            Log.e("HomeFragment", "isTimerRunning: $isRunning")
-            isTimerRunning = isRunning
-
-            if (isRunning) {
-                startTimer(true)
-            } else {
-                stopTimer(true)
-            }
-        }*/
-
 
         //welcome message
         //get user name from db
