@@ -132,8 +132,10 @@ class CalendarFragment : Fragment() {
         //load the activities from the database in the recyclerview
         activitiesViewModel.readAllData.observe(viewLifecycleOwner) { activities ->
             activitiesListViewModel.readAllData.observe(viewLifecycleOwner) { activitiesList ->
+
                 adapter = CalendarDayAdapter(activities, activitiesList, selectedDate)
                 recyclerView.adapter = adapter
+
             }
         }
 
@@ -176,10 +178,17 @@ class CalendarFragment : Fragment() {
 
         combinedLiveData.observe(viewLifecycleOwner, Observer { (firstActivity, latestActivity) ->
             if (firstActivity != null && latestActivity != null) {
-                val startMonth = YearMonth.of(getYear(firstActivity.startTime).toInt(), getMonth(firstActivity.startTime).toInt())
-                val endMonth = YearMonth.of(getYear(latestActivity.stopTime).toInt(), getMonth(latestActivity.stopTime).toInt())
+                val startMonth = YearMonth.of(
+                    getYear(firstActivity.startTime).toInt(),
+                    getMonth(firstActivity.startTime).toInt()
+                )
+                val endMonth = YearMonth.of(
+                    getYear(latestActivity.stopTime).toInt(),
+                    getMonth(latestActivity.stopTime).toInt()
+                )
 
-                val monthsToSubtract = ChronoUnit.MONTHS.between(startMonth, currentMonth).coerceAtLeast(0)
+                val monthsToSubtract =
+                    ChronoUnit.MONTHS.between(startMonth, currentMonth).coerceAtLeast(0)
                 val monthsToAdd = ChronoUnit.MONTHS.between(currentMonth, endMonth).coerceAtLeast(0)
 
 
@@ -190,8 +199,10 @@ class CalendarFragment : Fragment() {
                 )
 
                 binding.weekCalendarView.setup(
-                    currentMonth.minusMonths(monthsToSubtract).atStartOfMonth(),
-                    currentMonth.plusMonths(monthsToAdd).atEndOfMonth(),
+                    currentMonth.minusMonths(monthsToSubtract)
+                        .atDay(getDayNumber(firstActivity.startTime)), //bound to first day of the week
+                    currentMonth.plusMonths(monthsToAdd)
+                        .atDay(getDayNumber(latestActivity.stopTime)), //bound to last day of the week
                     firstDayOfWeekFromLocale()
                 )
                 binding.weekCalendarView.scrollToDate(LocalDate.now())
