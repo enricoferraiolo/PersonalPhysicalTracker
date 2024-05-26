@@ -1,5 +1,6 @@
 package com.example.personalphysicaltracker
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -7,6 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.personalphysicaltracker.data.ActivitiesList
 import com.example.personalphysicaltracker.data.Activity
+import com.example.personalphysicaltracker.data.ExtraInfo
 import java.time.LocalDate
 
 class CalendarDayAdapter(
@@ -18,8 +20,8 @@ class CalendarDayAdapter(
     private val activityIdToNameMap: Map<Int, String> =
         activitiesList.associate { it.id to it.name }
 
-    private var activitiesOfThisDay = getDayActivities(activities, selectedDate)
-
+    val dayActivities: List<Activity> = getDayActivities(activities, selectedDate)
+    private var activitiesOfThisDay = fillWithDummyActivities(dayActivities)
 
     class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
@@ -37,6 +39,7 @@ class CalendarDayAdapter(
     }
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
+        //fill activitiesOfThisDay with dummy
         val currentitem = activitiesOfThisDay[position]
 
         holder.itemView.visibility = View.VISIBLE
@@ -93,12 +96,100 @@ class CalendarDayAdapter(
 
     }
 
+    /*
+    every day must be covered with activities, if there are no activities, fill with a dummy activity that has a start time of 00:00:00 and an end time of 23:59:59
+    if there is an activity that starts and end on the same day, then one dummy activity will cover the part of the day before the activity and another dummy activity will cover the part of the day after the activity
+     */
+    //FIXME: controlla cosa succede se attività e messa nel giorno prima/dopo
+    private fun fillWithDummyActivities(activitiesOfThisDay: List<Activity>): List<Activity> {
+        val dummyActivities = mutableListOf<Activity>()
+
+        // Check if there are no activities for the selected day
+        if (activitiesOfThisDay.isEmpty()) {
+            Log.d("CalendarDayAdapter", "No activities for the selected day")
+            // Create a dummy activity covering the whole day
+            val dummyActivity = Activity(
+                id = -1, // Assign a unique negative id for dummy activities
+                userId = -1, // Assuming -1 represents dummy user in your system
+                activityId = -1, // Assuming -1 represents dummy activity in your system
+                startTime = selectedDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC)
+                    .toEpochMilli(), // Start time at 00:00:00
+                stopTime = selectedDate.plusDays(1).atStartOfDay().minusSeconds(1)
+                    .toInstant(java.time.ZoneOffset.UTC).toEpochMilli(), // End time at 23:59:59
+                extra = ExtraInfo(
+                    stepsSelector = false,
+                    metersSelector = false,
+                    steps = null,
+                    meters = null
+                )
+            )
+            dummyActivities.add(dummyActivity)
+        } else {
+            // Sort activities by start time
+            val sortedActivities = activitiesOfThisDay.sortedBy { it.startTime }
+
+            // Check if the first activity starts after midnight
+            if (sortedActivities.first().startTime > selectedDate.atStartOfDay()
+                    .toInstant(java.time.ZoneOffset.UTC).toEpochMilli()
+            ) {
+                // Create a dummy activity covering the time before the first activity
+                val dummyActivityBefore = Activity(
+                    id = -2, // Assign another unique negative id for dummy activities
+                    userId = -1, // Assuming -1 represents dummy user in your system
+                    activityId = -1, // Assuming -1 represents dummy activity in your system
+                    startTime = selectedDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC)
+                        .toEpochMilli(), // Start time at 00:00:00
+                    stopTime = sortedActivities.first().startTime - 1000, // End time before the first activity starts
+                    extra = ExtraInfo(
+                        stepsSelector = false,
+                        metersSelector = false,
+                        steps = null,
+                        meters = null
+                    )
+                )
+                dummyActivities.add(dummyActivityBefore)
+            }
+
+            // Check if the last activity ends before midnight
+            if (sortedActivities.last().stopTime < selectedDate.plusDays(1).atStartOfDay()
+                    .toInstant(java.time.ZoneOffset.UTC).toEpochMilli()
+            ) {
+                // Create a dummy activity covering the time after the last activity ends
+                val dummyActivityAfter = Activity(
+                    id = -3, // Assign another unique negative id for dummy activities
+                    userId = -1, // Assuming -1 represents dummy user in your system
+                    activityId = -1, // Assuming -1 represents dummy activity in your system
+                    startTime = sortedActivities.last().stopTime + 1000, // Start time after the last activity ends
+                    stopTime = selectedDate.plusDays(1).atStartOfDay()
+                        .toInstant(java.time.ZoneOffset.UTC).minusSeconds(1)
+                        .toEpochMilli(), // End time at 23:59:59
+                    extra = ExtraInfo(
+                        stepsSelector = false,
+                        metersSelector = false,
+                        steps = null,
+                        meters = null
+                    )
+                )
+                dummyActivities.add(dummyActivityAfter)
+            }
+        }
+
+
+        // Combine dummy activities with actual activities
+        val combinedList = mutableListOf<Activity>()
+        combinedList.addAll(activitiesOfThisDay)
+        combinedList.addAll(dummyActivities)
+
+        return combinedList.sortedBy { it.startTime }
+    }
+
+
     fun updateData(
         newSelectedDate: LocalDate
     ) {
         selectedDate = newSelectedDate
-
-        activitiesOfThisDay = getDayActivities(activities, selectedDate)
+        val dayActivities: List<Activity> = getDayActivities(activities, selectedDate)
+        activitiesOfThisDay = fillWithDummyActivities(dayActivities)
 
         notifyDataSetChanged()
     }
