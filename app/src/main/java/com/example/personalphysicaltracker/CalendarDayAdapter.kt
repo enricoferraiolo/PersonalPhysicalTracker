@@ -54,7 +54,21 @@ class CalendarDayAdapter(
 
 
         idTextView.text = currentitem.id.toString()
-        nameTextView.text = activityName ?: "Unknown Activity"
+
+        if (activityName != null) {
+            nameTextView.text = activityName
+            nameTextView.setTypeface(
+                null,
+                android.graphics.Typeface.BOLD
+            ) // Normal font for known activities
+        } else {
+            nameTextView.text = holder.itemView.context.getString(R.string.dummy_activity)
+            nameTextView.setTypeface(
+                null,
+                android.graphics.Typeface.ITALIC
+            ) // Italic font for unknown activities
+        }
+
         var startTimeString = ""
         var endTimeString = ""
         //check if the activity starts on the they before
@@ -93,7 +107,17 @@ class CalendarDayAdapter(
             append(" - ")
             append(endTimeString)
         }
-
+        if (currentitem.id < 0) {
+            tcTime.setTypeface(
+                android.graphics.Typeface.MONOSPACE,
+                android.graphics.Typeface.ITALIC
+            )
+        } else {
+            tcTime.setTypeface(
+                android.graphics.Typeface.MONOSPACE,
+                android.graphics.Typeface.BOLD
+            )
+        }
     }
 
     /*
@@ -148,6 +172,29 @@ class CalendarDayAdapter(
                     )
                 )
                 dummyActivities.add(dummyActivityBefore)
+            }
+
+            // Check for gaps between activities and add dummy activities
+            for (i in 0 until sortedActivities.size - 1) {
+                val currentActivity = sortedActivities[i]
+                val nextActivity = sortedActivities[i + 1]
+
+                if (currentActivity.stopTime < nextActivity.startTime - 1000) {
+                    val dummyActivityBetween = Activity(
+                        id = -4,
+                        userId = -1, // Assuming -1 represents dummy user in your system
+                        activityId = -1, // Assuming -1 represents dummy activity in your system
+                        startTime = currentActivity.stopTime + 1000, // Start time one second after the current activity ends
+                        stopTime = nextActivity.startTime - 1000, // End time one second before the next activity starts
+                        extra = ExtraInfo(
+                            stepsSelector = false,
+                            metersSelector = false,
+                            steps = null,
+                            meters = null
+                        )
+                    )
+                    dummyActivities.add(dummyActivityBetween)
+                }
             }
 
             // Check if the last activity ends before midnight
