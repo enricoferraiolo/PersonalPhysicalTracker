@@ -58,7 +58,8 @@ class HomeFragment : Fragment() {
 
     private var isTimerRunning = false
 
-
+    // spinner is NOT selected when the fragment is created
+    private var isFirstSpinnerSelection = true
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -82,9 +83,20 @@ class HomeFragment : Fragment() {
 
         // Set OnItemSelectedListener for the spinner
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+            override fun onItemSelected(
+                parent: AdapterView<*>,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
                 // Call resetAction() when a new item is selected
-                resetAction()
+                //oncreateview is called and it selects an item when the fragment is created, so we need to check if it is the first selection
+                if (!isFirstSpinnerSelection) {
+                    resetAction()
+                } else {
+                    //no reset if it is the first selection
+                    isFirstSpinnerSelection = false
+                }
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {
@@ -112,6 +124,16 @@ class HomeFragment : Fragment() {
 
         //btn register activity onclicklistener
         binding.homeBtnRegisterActivity.setOnClickListener {
+            //check if timer is running
+            if (binding.homeBtnStartAndStop.tag == "start") {
+                Toast.makeText(
+                    requireContext(),
+                    "Start the timer before registering an activity!",
+                    Toast.LENGTH_LONG
+                ).show()
+                return@setOnClickListener
+            }
+
             //register activity
             val selectedActivity = spinner.selectedItem.toString()
             registerActivity(selectedActivity)
@@ -195,7 +217,8 @@ class HomeFragment : Fragment() {
                     resetAction()
 
                     //toast
-                    Toast.makeText(requireContext(), "Activity registered!", Toast.LENGTH_LONG).show()
+                    Toast.makeText(requireContext(), "Activity registered!", Toast.LENGTH_LONG)
+                        .show()
 
                 } else {
                     Log.d("HomeFragment", "No time elapsed ")
