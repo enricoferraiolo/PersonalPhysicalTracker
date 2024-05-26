@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/fl_calendar_day_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:tools="http://schemas.android.com/tools"
     android:background="?attr/selectableItemBackground"
-    tools:background="@color/ic_launcher_background">
+    tools:background="@color/green_500">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -36,5 +37,5 @@
         android:layout_width="match_parent"
         android:layout_height="5dp"
         android:layout_gravity="bottom"
-        android:background="@color/teal_200" />
+        android:background="@color/purple_700" />
 </FrameLayout>

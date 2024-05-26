@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.personalphysicaltracker.data.ActivitiesList
@@ -51,6 +52,11 @@ class CalendarFragment : Fragment() {
 
         initializeDefaultDate()
 
+        //view model
+        val activitiesViewModel = ViewModelProvider(this).get(ActivitiesViewModel::class.java)
+        val activitiesListViewModel =
+            ViewModelProvider(this).get(ActivitiesListViewModel::class.java)
+
         class DayViewContainer(view: View) : ViewContainer(view) {
             val bind = CalendarDayLayoutBinding.bind(view)
             lateinit var day: WeekDay
@@ -77,13 +83,23 @@ class CalendarFragment : Fragment() {
                 bind.calendarDayText.text = day.date.dayOfWeek.displayText()
 
                 val colorRes = if (day.date == selectedDate) {
-                    R.color.purple_200
+                    R.color.purple_500
                 } else {
                     R.color.black
                 }
                 bind.calendarDateText.setTextColor(view.context.getColorCompat(colorRes))
                 bind.calendarDayText.setTextColor(view.context.getColorCompat(colorRes))
                 bind.exSevenSelectedView.isVisible = day.date == selectedDate
+
+                //check if there are activities for the day
+                activitiesViewModel.readAllData.observe(viewLifecycleOwner) { activities ->
+                    val activitiesOfDay = getDayActivities(activities, day.date)
+                    if (activitiesOfDay.isNotEmpty()) {
+                        bind.flCalendarDayLayout.setBackgroundColor(view.context.getColorCompat(R.color.green_500))
+                    } else {
+                        bind.flCalendarDayLayout.setBackgroundColor(view.context.getColorCompat(R.color.gray_500))
+                    }
+                }
             }
 
 
@@ -108,11 +124,8 @@ class CalendarFragment : Fragment() {
         // recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        //view model
-        val activitiesViewModel = ViewModelProvider(this).get(ActivitiesViewModel::class.java)
-        val activitiesListViewModel =
-            ViewModelProvider(this).get(ActivitiesListViewModel::class.java)
 
+        //load the activities from the database in the recyclerview
         activitiesViewModel.readAllData.observe(viewLifecycleOwner) { activities ->
             activitiesListViewModel.readAllData.observe(viewLifecycleOwner) { activitiesList ->
                 adapter = CalendarDayAdapter(activities, activitiesList, selectedDate)

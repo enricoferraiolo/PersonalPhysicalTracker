@@ -18,7 +18,7 @@ class CalendarDayAdapter(
     private val activityIdToNameMap: Map<Int, String> =
         activitiesList.associate { it.id to it.name }
 
-    private var activitiesOfThisDay = getDayActivities()
+    private var activitiesOfThisDay = getDayActivities(activities, selectedDate)
 
 
     class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -98,51 +98,11 @@ class CalendarDayAdapter(
     ) {
         selectedDate = newSelectedDate
 
-        activitiesOfThisDay = getDayActivities()
+        activitiesOfThisDay = getDayActivities(activities, selectedDate)
 
         notifyDataSetChanged()
     }
 
-    private fun getDayActivities(): List<Activity> {
-        //check if activity has been registered for the day
-        //an activity is DISPLAYED IFF given day D and activity A, there is an entry in the database
-        //s.t. A.startTime is in D and A.stopTime is in D OR A.startTime is in D-1 and A.stopTime is in D OR A.startTime is in D and A.stopTime is in D+1
-
-        return activities.filter {
-            val activityStartDate = it.startTime
-            val activityEndDate = it.stopTime
-
-            val selectedDateStartMillis =
-                selectedDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli()
-            val selectedDateEndMillis =
-                selectedDate.plusDays(1).atStartOfDay().toInstant(java.time.ZoneOffset.UTC)
-                    .toEpochMilli()
-
-            (activityStartDate in selectedDateStartMillis until selectedDateEndMillis) ||
-                    (activityEndDate in selectedDateStartMillis until selectedDateEndMillis)
-        }
-    }
-
-    private fun getYear(time: Long): String {
-        val date = java.time.Instant.ofEpochMilli(time)
-            .atZone(java.time.ZoneId.systemDefault())
-            .toLocalDate()
-        return date.year.toString()
-    }
-
-    private fun getMonth(time: Long): String {
-        val date = java.time.Instant.ofEpochMilli(time)
-            .atZone(java.time.ZoneId.systemDefault())
-            .toLocalDate()
-        return date.monthValue.toString()
-    }
-
-    private fun getDay(time: Long): String {
-        val date = java.time.Instant.ofEpochMilli(time)
-            .atZone(java.time.ZoneId.systemDefault())
-            .toLocalDate()
-        return date.dayOfMonth.toString()
-    }
 
     private fun timeStringFromLong(elapsedTimeMillis: Long, showSeconds: Boolean): String {
         val seconds = (elapsedTimeMillis / 1000) % 60
