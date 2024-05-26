@@ -46,16 +46,50 @@ class CalendarDayAdapter(
         val nameTextView =
             holder.itemView.findViewById<com.google.android.material.textview.MaterialTextView>(R.id.name_day_calendar_row)
         val activityName = activityIdToNameMap[currentitem.activityId]
-        val tcStart =
-            holder.itemView.findViewById<TextView>(R.id.tc_start_time_day_calendar_row)
-        val tcEnd =
-            holder.itemView.findViewById<TextView>(R.id.tc_end_time_day_calendar_row)
+        val tcTime =
+            holder.itemView.findViewById<com.google.android.material.textview.MaterialTextView>(R.id.tc_time_day_calendar_row)
 
 
         idTextView.text = currentitem.id.toString()
         nameTextView.text = activityName ?: "Unknown Activity"
-        tcStart.text = timeStringFromLong(currentitem.startTime, true)
-        tcEnd.text = timeStringFromLong(currentitem.stopTime, true)
+        var startTimeString = ""
+        var endTimeString = ""
+        //check if the activity starts on the they before
+        val activityStartDate = currentitem.startTime
+        val selectedDateStartMillis =
+            selectedDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli()
+        if (activityStartDate < selectedDateStartMillis) {
+            startTimeString = buildString {
+                append(selectedDate.minusDays(1).dayOfWeek.toString().substring(0, 3))
+                append(" ")
+                append(timeStringFromLong(currentitem.startTime, true))
+            }
+        } else {
+            startTimeString = timeStringFromLong(currentitem.startTime, true)
+        }
+
+        //check if the activity ends on the day after
+        val activityEndDate = currentitem.stopTime
+        val selectedDateEndMillis =
+            selectedDate.plusDays(1).atStartOfDay().toInstant(java.time.ZoneOffset.UTC)
+                .toEpochMilli()
+        if (activityEndDate > selectedDateEndMillis) {
+            endTimeString = buildString {
+                //append(selectedDate.plusDays(1).dayOfWeek.toString().substring(0, 3))
+                //append(" ")
+                append(timeStringFromLong(currentitem.stopTime, true))
+                append(" ")
+                append(selectedDate.plusDays(1).dayOfWeek.toString().substring(0, 3))
+            }
+        } else {
+            endTimeString = timeStringFromLong(currentitem.stopTime, true)
+        }
+
+        tcTime.text = buildString {
+            append(startTimeString)
+            append(" - ")
+            append(endTimeString)
+        }
 
     }
 
