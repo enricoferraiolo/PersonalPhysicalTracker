@@ -146,7 +146,6 @@ class CalendarDayAdapter(
     every day must be covered with activities, if there are no activities, fill with a dummy activity that has a start time of 00:00:00 and an end time of 23:59:59
     if there is an activity that starts and end on the same day, then one dummy activity will cover the part of the day before the activity and another dummy activity will cover the part of the day after the activity
      */
-    //FIXME: controlla cosa succede se attività e messa nel giorno prima/dopo
     private fun fillWithDummyActivities(activitiesOfThisDay: List<Activity>): List<Activity> {
         val dummyActivities = mutableListOf<Activity>()
 
