@@ -200,7 +200,7 @@ class HomeFragment : Fragment() {
                             userViewModel.readAllData.value?.get(0)?.id ?: 0,
                             selectedActivity.id,
                             startTime,
-                            stopTime + 86400000 * 2,
+                            stopTime,
                             ExtraInfo(
                                 selectedActivity.extra?.stepsSelector ?: false,
                                 selectedActivity.extra?.metersSelector ?: false,
