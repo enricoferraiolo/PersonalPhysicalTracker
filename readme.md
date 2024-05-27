@@ -15,4 +15,4 @@
     - e se un'attività dura più di un giorno?
       - da vedere come funziona in primis
         - posso decidere che viene visualizzata dove inizia e dove finisce e basta
-  - un'activity registrata con foreign key eliminata (null) viene vista come "Uknown activity"
+  - un'activity registrata con foreign key eliminata (null) viene vista come "Deleted activity"

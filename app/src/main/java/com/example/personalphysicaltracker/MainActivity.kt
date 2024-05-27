@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
 import android.view.Menu
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -106,7 +107,11 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
         // menu should be considered as top level destinations.
         appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.nav_home, R.id.nav_charts, R.id.nav_info, R.id.nav_manageActivityList, R.id.calendarFragment
+                R.id.nav_home,
+                R.id.nav_charts,
+                R.id.nav_info,
+                R.id.nav_manageActivityList,
+                R.id.calendarFragment
             ), drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
@@ -114,7 +119,6 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
 
         //SharedTimerViewModel
         sharedTimerViewModel = ViewModelProvider(this).get(SharedTimerViewModel::class.java)
-
     }
 
     override fun onResume() {
@@ -157,8 +161,13 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.main, menu)
+
+        //hide filter btn
+        menu.findItem(R.id.action_filter).isVisible = false
+
         return true
     }
+
 
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment_content_main)

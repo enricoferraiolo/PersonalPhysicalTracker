@@ -4,10 +4,12 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.graphics.drawable.Drawable
+import android.util.Log
 import android.widget.TextView
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
+import com.example.personalphysicaltracker.data.ActivitiesList
 import com.kizitonwose.calendar.core.Week
 import com.kizitonwose.calendar.core.yearMonth
 import java.time.DayOfWeek
@@ -83,13 +85,14 @@ fun getDayNumber(time: Long): Int {
 
 fun getDayActivities(
     activities: List<com.example.personalphysicaltracker.data.Activity>,
-    date: LocalDate
+    date: LocalDate,
+    filterActivitiesList: List<ActivitiesList>
 ): List<com.example.personalphysicaltracker.data.Activity> {
     //check if activity has been registered for the day
     //an activity is DISPLAYED IFF given day D and activity A, there is an entry in the database
     //s.t. A.startTime is in D and A.stopTime is in D OR A.startTime is in D-1 and A.stopTime is in D OR A.startTime is in D and A.stopTime is in D+1
-
-    return activities.filter {
+    Log.d("getDayActivities", "filter: $filterActivitiesList")
+    return activities.filter { it ->
         val activityStartDate = it.startTime
         val activityEndDate = it.stopTime
 
@@ -99,8 +102,15 @@ fun getDayActivities(
             date.plusDays(1).atStartOfDay().toInstant(java.time.ZoneOffset.UTC)
                 .toEpochMilli()
 
-        (activityStartDate in selectedDateStartMillis until selectedDateEndMillis) ||
-                (activityEndDate in selectedDateStartMillis until selectedDateEndMillis)
+        var activityIsInFilter = false
+        filterActivitiesList.forEach() { filter ->
+            if (it.activityId == filter.id) {
+                activityIsInFilter = true
+            }
+        }
+
+        ((activityStartDate in selectedDateStartMillis until selectedDateEndMillis) ||
+                (activityEndDate in selectedDateStartMillis until selectedDateEndMillis)) && activityIsInFilter
     }
 }
 

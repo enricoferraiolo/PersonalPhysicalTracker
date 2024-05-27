@@ -90,4 +90,5 @@ class ActivitiesViewModel(application: Application) : AndroidViewModel(applicati
     fun getLatestActivity(): LiveData<Activity?> {
         return repository.getLatestActivity()
     }
+
 }

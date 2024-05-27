@@ -5,13 +5,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.personalphysicaltracker.data.ActivitiesList
 import com.example.personalphysicaltracker.data.Activity
 import com.example.personalphysicaltracker.data.ExtraInfo
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.time.LocalDate
 
 class CalendarDayAdapter(
@@ -19,11 +17,16 @@ class CalendarDayAdapter(
     private var activitiesList: List<ActivitiesList>,
     private var selectedDate: LocalDate //yyyy-MM-dd
 ) : RecyclerView.Adapter<CalendarDayAdapter.MyViewHolder>() {
-    //private var activities = emptyList<Activity>()
     private val activityIdToNameMap: Map<Int?, String> =
-        activitiesList.associate { it.id to it.name }.plus(null to "Unknown activity")
+        activitiesList.associate { it.id to it.name }.plus(null to "Deleted activity")
 
-    val dayActivities: List<Activity> = getDayActivities(activities, selectedDate)
+
+    val dayActivities: List<Activity> = getDayActivities(
+        activities,
+        selectedDate,
+        activitiesList //all'inizio tutte le attività sono nel filtro
+    )
+
     private var activitiesOfThisDay = fillWithDummyActivities(dayActivities)
 
     class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -47,8 +50,8 @@ class CalendarDayAdapter(
 
         holder.itemView.visibility = View.VISIBLE
 
-       // val idTextView =
-           // holder.itemView.findViewById<com.google.android.material.textview.MaterialTextView>(R.id.id_list_day_calendar_row)
+        // val idTextView =
+        // holder.itemView.findViewById<com.google.android.material.textview.MaterialTextView>(R.id.id_list_day_calendar_row)
         val nameTextView =
             holder.itemView.findViewById<com.google.android.material.textview.MaterialTextView>(R.id.name_day_calendar_row)
         val activityName = activityIdToNameMap[currentitem.activityId]
@@ -56,7 +59,7 @@ class CalendarDayAdapter(
             holder.itemView.findViewById<com.google.android.material.textview.MaterialTextView>(R.id.tc_time_day_calendar_row)
 
 
-       // idTextView.text = currentitem.id.toString()
+        // idTextView.text = currentitem.id.toString()
 
         if (activityName != null) {
             nameTextView.text = activityName
@@ -129,7 +132,6 @@ class CalendarDayAdapter(
             Toast.makeText(context, "Activity: ${nameTextView.text}", Toast.LENGTH_SHORT).show()
         }
     }
-
 
 
     /*
@@ -244,12 +246,21 @@ class CalendarDayAdapter(
 
 
     fun updateData(
-        newSelectedDate: LocalDate
+        newSelectedDate: LocalDate,
+        filteredActivitiesList: List<ActivitiesList>
     ) {
         selectedDate = newSelectedDate
-        val dayActivities: List<Activity> = getDayActivities(activities, selectedDate)
+        val dayActivities: List<Activity> = getDayActivities(
+            activities,
+            selectedDate,
+            filteredActivitiesList
+        )
         activitiesOfThisDay = fillWithDummyActivities(dayActivities)
 
+        notifyDataSetChanged()
+    }
+
+    fun notifyDataChanged() {
         notifyDataSetChanged()
     }
 

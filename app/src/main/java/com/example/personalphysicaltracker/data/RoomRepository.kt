@@ -51,4 +51,5 @@ class ActivitiesRepository(private val activitiesDao: ActivitiesDao) {
     fun getLatestActivity(): LiveData<Activity?> {
         return activitiesDao.getLatestActivity()
     }
+
 }

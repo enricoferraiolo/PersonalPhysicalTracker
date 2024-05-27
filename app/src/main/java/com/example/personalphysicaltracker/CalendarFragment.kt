@@ -1,18 +1,21 @@
 package com.example.personalphysicaltracker
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.personalphysicaltracker.data.ActivitiesList
 import com.example.personalphysicaltracker.data.ActivitiesListViewModel
 import com.example.personalphysicaltracker.data.ActivitiesViewModel
@@ -20,7 +23,6 @@ import com.example.personalphysicaltracker.data.Activity
 import com.example.personalphysicaltracker.databinding.CalendarDayLayoutBinding
 import com.example.personalphysicaltracker.databinding.FragmentCalendarBinding
 import com.kizitonwose.calendar.core.WeekDay
-import com.kizitonwose.calendar.core.atStartOfMonth
 import com.kizitonwose.calendar.core.firstDayOfWeekFromLocale
 import com.kizitonwose.calendar.view.ViewContainer
 import com.kizitonwose.calendar.view.WeekDayBinder
@@ -34,6 +36,7 @@ class CalendarFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
     }
 
     private var _binding: FragmentCalendarBinding? = null
@@ -46,6 +49,58 @@ class CalendarFragment : Fragment() {
     private val weekDateFormatter = DateTimeFormatter.ofPattern("dd")
     private val fullDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
     private lateinit var adapter: CalendarDayAdapter
+
+    private var activitiesList = emptyList<ActivitiesList>()
+    private var filterActivities = emptyList<ActivitiesList>()
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        // Inflating the menu; this adds items to the action bar if it is present.
+        inflater.inflate(R.menu.main, menu)
+
+        // Find the filter button in the menu
+        val filterItem = menu.findItem(R.id.action_filter)
+
+        // Make the filter button visible
+        filterItem.isVisible = true
+
+        // Set a click listener for the filter button
+        filterItem.setOnMenuItemClickListener {
+            // Create and show the AlertDialog
+            showFilterDialog()
+
+            true // Return true to consume the click event
+        }
+    }
+
+    private fun showFilterDialog() {
+        // Inflate the dialog layout
+        val dialogView = LayoutInflater.from(requireContext())
+            .inflate(R.layout.dialog_filter_activities, null)
+
+        // Initialize RecyclerView and its adapter
+        val recyclerView =
+            dialogView.findViewById<RecyclerView>(R.id.dialog_filter_recycler_view_activities)
+        val adapterDialog = DialogActivitiesAdapter(activitiesList, filterActivities)
+        recyclerView.adapter = adapterDialog
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+
+        // Build and show the AlertDialog
+        AlertDialog.Builder(requireContext())
+            .setTitle("Select Activities to Filter")
+            .setView(dialogView)
+            .setPositiveButton("Save") { dialog, _ ->
+                val selectedActivities = adapterDialog.getSelectedActivities()
+                filterActivities = selectedActivities
+                binding.weekCalendarView.notifyCalendarChanged()
+                adapter.updateData(selectedDate, filterActivities)
+
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -74,7 +129,7 @@ class CalendarFragment : Fragment() {
                         oldDate?.let { binding.weekCalendarView.notifyDateChanged(it) }
 
                         //binding.tvSelectedDate.text = fullDateFormatter.format(day.date).toString()
-                        adapter.updateData(day.date)
+                        adapter.updateData(day.date, filterActivities)
                         //load the activities for the day
                         loadDayActivities(day.date)
                     }
@@ -97,7 +152,8 @@ class CalendarFragment : Fragment() {
 
                 //check if there are activities for the day
                 activitiesViewModel.readAllData.observe(viewLifecycleOwner) { activities ->
-                    val activitiesOfDay = getDayActivities(activities, day.date)
+                    val activitiesOfDay =
+                        getDayActivities(activities, day.date, filterActivities)
                     if (activitiesOfDay.isNotEmpty()) {
                         bind.flCalendarDayLayout.setBackgroundColor(view.context.getColorCompat(R.color.green_500))
                     } else {
@@ -136,15 +192,24 @@ class CalendarFragment : Fragment() {
                 if (activities.isNotEmpty()) {
                     //check if activitiesList is not empty
                     if (activitiesList.isNotEmpty()) {
-                        adapter = CalendarDayAdapter(activities, activitiesList, selectedDate)
+                        adapter = CalendarDayAdapter(
+                            activities,
+                            activitiesList,
+                            selectedDate
+                        )
                         recyclerView.adapter = adapter
                         binding.tvNoActivities.isVisible = false
+
+                        this.activitiesList = activitiesList
+                        this.filterActivities = activitiesList
+                        binding.weekCalendarView.notifyCalendarChanged()
                     }
-                }else{
+                } else {
                     binding.tvNoActivities.isVisible = true
                 }
             }
         }
+
 
         return root
     }
@@ -218,6 +283,7 @@ class CalendarFragment : Fragment() {
         })
 
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

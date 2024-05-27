@@ -54,4 +54,5 @@ interface ActivitiesDao {
 
     @Query("SELECT * FROM activities_table ORDER BY stopTime DESC LIMIT 1")
     fun getLatestActivity(): LiveData<Activity?>
+
 }
