@@ -41,7 +41,8 @@ class ManageActivitylist : Fragment() {
         //recyclerview
         val adapter = ActivitiesListAdapter(
             { activitiesList -> manageActivitylistViewModel.editActivity(activitiesList) },
-            { activitiesList -> manageActivitylistViewModel.deleteActivity(activitiesList) }
+            { activitiesList -> manageActivitylistViewModel.deleteActivity(activitiesList) },
+            requireContext()
         )
         val recyclerView = binding.managerRvActivitiesList
         recyclerView.adapter = adapter

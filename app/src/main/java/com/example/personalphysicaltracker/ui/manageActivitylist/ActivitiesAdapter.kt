@@ -1,9 +1,13 @@
 package com.example.personalphysicaltracker.ui.manageActivitylist
 
+import android.app.AlertDialog
+import android.content.Context
+import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.personalphysicaltracker.R
 import com.example.personalphysicaltracker.data.ActivitiesList
@@ -11,13 +15,11 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class ActivitiesListAdapter(
     private val editActivityCallback: (ActivitiesList) -> Unit,
-    private val deleteActivityCallback: (ActivitiesList) -> Unit
+    private val deleteActivityCallback: (ActivitiesList) -> Unit,
+    private val context: Context
+
 ) : RecyclerView.Adapter<ActivitiesListAdapter.MyViewHolder>() {
     private var activitiesList = emptyList<ActivitiesList>()
-    private var editing = false
-    private var lastItem: ActivitiesList? = null
-    private var lastEditBtn: FloatingActionButton? = null
-    private var lastNameET: EditText? = null
 
     class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     }
@@ -36,9 +38,9 @@ class ActivitiesListAdapter(
         val currentItem = activitiesList[position]
         holder.itemView.findViewById<com.google.android.material.textview.MaterialTextView>(R.id.id_list_frag)?.text =
             currentItem.id.toString()
-        val nameTextView = holder.itemView.findViewById<EditText>(R.id.name_list_frag)
+        val nameTextView = holder.itemView.findViewById<TextView>(R.id.name_list_frag)
         nameTextView.setText(currentItem.name)
-        nameTextView.isEnabled = false
+        //nameTextView.isEnabled = false
         nameTextView.isFocusable = false
         nameTextView.isFocusableInTouchMode = false
 
@@ -55,58 +57,58 @@ class ActivitiesListAdapter(
             btnEdit.isEnabled = false
         }
 
-        //reset last items
-        setLastItems(null, null, null)
-
-        //reset editing
-        resetEditBtn(btnEdit)
-
 
         //set on click listener for each item
         btnEdit.setOnClickListener {
-            editActivity(
-                btnEdit,
-                nameTextView,
-                currentItem
-            )
+            showEditDialog(currentItem)
         }
 
         btnDelete.setOnClickListener {
-            deleteActivity(currentItem)
+            showDeleteConfirmationDialog(currentItem)
         }
     }
 
+    private fun showDeleteConfirmationDialog(currentItem: ActivitiesList) {
+        val message = "Are you sure you want to delete <i><b>${currentItem.name}</b></i> activity?"
+        AlertDialog.Builder(context)
+            .setTitle("Confirm Delete")
+            .setMessage(Html.fromHtml(message, Html.FROM_HTML_MODE_LEGACY))
+            .setPositiveButton("Yes") { dialog, _ ->
+                deleteActivity(currentItem)
+                dialog.dismiss()
+            }
+            .setNegativeButton("No") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .create()
+            .show()
+    }
 
     private fun deleteActivity(currentItem: ActivitiesList) {
         deleteActivityCallback(currentItem)
         notifyDataSetChanged()
     }
 
-    private fun editActivity(
-        btn: FloatingActionButton,
-        nameTextView: EditText,
-        currentItem: ActivitiesList
-    ) {
-        if (lastItem != null && lastItem != currentItem) {
-            resetEditBtn(lastEditBtn!!)
-            changeETStatus(lastNameET!!, false)
-        }
+    private fun showEditDialog(currentItem: ActivitiesList) {
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_edit_activity, null)
+        val editText = dialogView.findViewById<EditText>(R.id.edit_activity_name)
+        editText.setText(currentItem.name)
 
-        if (!editing) {//if not editing, change to editing mode
-            editing = true
-            changeViewSrc(btn, R.drawable.round_check_24)
-            changeETStatus(nameTextView, true)
-            setLastItems(currentItem, btn, nameTextView)
-        } else {    //if editing, save changes
-            editing = false
-            changeViewSrc(btn, R.drawable.round_edit_24)
-            changeETStatus(nameTextView, false)
-            currentItem.name = nameTextView.text.toString()
-            editActivityCallback(currentItem)
-            setLastItems(null, null, null)
-        }
+        AlertDialog.Builder(context)
+            .setTitle("Edit Activity")
+            .setView(dialogView)
+            .setPositiveButton("Save") { dialog, _ ->
+                currentItem.name = editText.text.toString()
+                editActivityCallback(currentItem)
+                notifyDataSetChanged()
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .create()
+            .show()
     }
-
 
     override fun getItemCount(): Int {
         return activitiesList.size
@@ -115,26 +117,5 @@ class ActivitiesListAdapter(
     fun setData(activitiesList: List<ActivitiesList>) {
         this.activitiesList = activitiesList
         notifyDataSetChanged() //notify recyclerview that data has changed
-    }
-
-    private fun changeViewSrc(button: FloatingActionButton, drawable: Int) {
-        button.setImageResource(drawable)
-    }
-
-    private fun resetEditBtn(button: FloatingActionButton) {
-        button.setImageResource(R.drawable.round_edit_24)
-        editing = false
-    }
-
-    private fun changeETStatus(editText: EditText, status: Boolean) {
-        editText.isEnabled = status
-        editText.isFocusable = status
-        editText.isFocusableInTouchMode = status
-    }
-
-    private fun setLastItems(item: ActivitiesList?, btn: FloatingActionButton?, et: EditText?) {
-        lastItem = item
-        lastEditBtn = btn
-        lastNameET = et
     }
 }

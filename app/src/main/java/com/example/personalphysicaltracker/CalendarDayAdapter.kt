@@ -20,8 +20,8 @@ class CalendarDayAdapter(
     private var selectedDate: LocalDate //yyyy-MM-dd
 ) : RecyclerView.Adapter<CalendarDayAdapter.MyViewHolder>() {
     //private var activities = emptyList<Activity>()
-    private val activityIdToNameMap: Map<Int, String> =
-        activitiesList.associate { it.id to it.name }
+    private val activityIdToNameMap: Map<Int?, String> =
+        activitiesList.associate { it.id to it.name }.plus(null to "Unknown activity")
 
     val dayActivities: List<Activity> = getDayActivities(activities, selectedDate)
     private var activitiesOfThisDay = fillWithDummyActivities(dayActivities)

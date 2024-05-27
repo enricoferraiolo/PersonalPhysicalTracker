@@ -1,3 +1,4 @@
+- readme
 - db con room
   - 3 cosi per ora, activities sono quelle registrate da utente.
   - activitieslist sono le attivita in generale, quelle nell'app / aggiunte da utente
@@ -14,3 +15,4 @@
     - e se un'attività dura più di un giorno?
       - da vedere come funziona in primis
         - posso decidere che viene visualizzata dove inizia e dove finisce e basta
+  - un'activity registrata con foreign key eliminata (null) viene vista come "Uknown activity"

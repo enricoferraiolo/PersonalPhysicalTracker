@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [User::class, ActivitiesList::class, Activity::class],
@@ -33,7 +34,18 @@ abstract class UserDatabase : RoomDatabase() {
                     context.applicationContext,
                     UserDatabase::class.java,
                     "app_database"
-                ).build()
+                ).addCallback(object : RoomDatabase.Callback() {
+                    override fun onCreate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                        super.onCreate(db)
+                        // insert the data on the IO Thread
+                        db.execSQL("PRAGMA foreign_keys=ON;")
+                    }
+
+                    override fun onOpen(db: SupportSQLiteDatabase) {
+                        super.onOpen(db)
+                        db.execSQL("PRAGMA foreign_keys=ON;")
+                    }
+                }).build()
                 INSTANCE = instance
                 return instance
             }

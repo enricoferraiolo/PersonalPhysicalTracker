@@ -61,7 +61,7 @@ data class ActivitiesList(
             entity = ActivitiesList::class,
             parentColumns = ["id"],
             childColumns = ["activityId"],
-            onDelete = ForeignKey.NO_ACTION //if activity is deleted, keep the activity in the db
+            onDelete = ForeignKey.SET_NULL
         )
     ],
     indices = [Index(value = ["userId"]), Index(value = ["activityId"])]
@@ -70,7 +70,7 @@ data class Activity(
     @PrimaryKey(autoGenerate = true)
     val id: Int,
     val userId: Int,
-    val activityId: Int,
+    val activityId: Int?,
     val startTime: Long,
     val stopTime: Long,
     val extra: ExtraInfo?
