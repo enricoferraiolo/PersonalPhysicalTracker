@@ -76,38 +76,9 @@ class CalendarDayAdapter(
 
         }
 
-        var startTimeString = ""
-        var endTimeString = ""
-        //check if the activity starts on the they before
-        val activityStartDate = currentitem.startTime
-        val selectedDateStartMillis =
-            selectedDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli()
-        if (activityStartDate < selectedDateStartMillis) {
-            startTimeString = buildString {
-                append(selectedDate.minusDays(1).dayOfWeek.toString().substring(0, 3))
-                append(" ")
-                append(timeStringFromLong(currentitem.startTime, true))
-            }
-        } else {
-            startTimeString = timeStringFromLong(currentitem.startTime, true)
-        }
 
-        //check if the activity ends on the day after
-        val activityEndDate = currentitem.stopTime
-        val selectedDateEndMillis =
-            selectedDate.plusDays(1).atStartOfDay().toInstant(java.time.ZoneOffset.UTC)
-                .toEpochMilli()
-        if (activityEndDate > selectedDateEndMillis) {
-            endTimeString = buildString {
-                //append(selectedDate.plusDays(1).dayOfWeek.toString().substring(0, 3))
-                //append(" ")
-                append(timeStringFromLong(currentitem.stopTime, true))
-                append(" ")
-                append(selectedDate.plusDays(1).dayOfWeek.toString().substring(0, 3))
-            }
-        } else {
-            endTimeString = timeStringFromLong(currentitem.stopTime, true)
-        }
+        val startTimeString = formatTimeClockString(currentitem.startTime, selectedDate, true)
+        val endTimeString = formatTimeClockString(currentitem.stopTime, selectedDate, false)
 
         tcTime.text = buildString {
             append(startTimeString)
@@ -133,6 +104,43 @@ class CalendarDayAdapter(
         }
     }
 
+    fun formatTimeClockString(
+        eventTimeMillis: Long,
+        selectedDate: java.time.LocalDate,
+        isStartTime: Boolean //if true, check if activity started before selectedDate, if false, check if activity ended after selectedDate
+    ): String {
+        val selectedDateMillis = if (isStartTime) {
+            selectedDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli()
+        } else {
+            selectedDate.plusDays(1).atStartOfDay().toInstant(java.time.ZoneOffset.UTC)
+                .toEpochMilli()
+        }
+
+        return if (isStartTime && eventTimeMillis < selectedDateMillis || !isStartTime && eventTimeMillis > selectedDateMillis) {
+            val eventDate = java.time.Instant.ofEpochMilli(eventTimeMillis)
+                .atZone(java.time.ZoneOffset.UTC)
+                .toLocalDate()
+            val daysDifference = if (isStartTime) {
+                java.time.temporal.ChronoUnit.DAYS.between(eventDate, selectedDate)
+            } else {
+                java.time.temporal.ChronoUnit.DAYS.between(selectedDate, eventDate)
+            }
+
+            buildString {
+                append(
+                    if (isStartTime) {
+                        selectedDate.minusDays(daysDifference)
+                    } else {
+                        selectedDate.plusDays(daysDifference)
+                    }.dayOfWeek.toString().substring(0, 3)
+                )
+                append(" ")
+                append(timeStringFromLong(eventTimeMillis, true))
+            }
+        } else {
+            timeStringFromLong(eventTimeMillis, true)
+        }
+    }
 
     /*
     every day must be covered with activities, if there are no activities, fill with a dummy activity that has a start time of 00:00:00 and an end time of 23:59:59

@@ -165,7 +165,8 @@ class HomeFragment : Fragment() {
             }
         }
 
-        val sensorManager = ContextCompat.getSystemService(requireContext(), SensorManager::class.java)
+        val sensorManager =
+            ContextCompat.getSystemService(requireContext(), SensorManager::class.java)
         val sensor: Sensor? = sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
 
 
@@ -199,7 +200,7 @@ class HomeFragment : Fragment() {
                             userViewModel.readAllData.value?.get(0)?.id ?: 0,
                             selectedActivity.id,
                             startTime,
-                            stopTime,
+                            stopTime + 86400000 * 2,
                             ExtraInfo(
                                 selectedActivity.extra?.stepsSelector ?: false,
                                 selectedActivity.extra?.metersSelector ?: false,
