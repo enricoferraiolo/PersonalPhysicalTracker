@@ -202,7 +202,7 @@ class CalendarFragment : Fragment() {
 
                         this.activitiesList = activitiesList
                         this.filterActivities = activitiesList
-                        binding.weekCalendarView.notifyCalendarChanged()
+                        binding.weekCalendarView.notifyCalendarChanged() //FIXME: errore a questa riga quando aggiungo un'activity dal manager e torno al calendario, anche quando registro un'attività dalla home fragment e ritorno. ogni volta che aggiorno il db?
                     }
                 } else {
                     binding.tvNoActivities.isVisible = true

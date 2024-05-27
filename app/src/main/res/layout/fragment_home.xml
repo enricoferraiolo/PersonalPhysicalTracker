@@ -25,7 +25,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -40,26 +40,32 @@
             android:layout_margin="30dp" />
         <!--aggiungere un massimo di caratteri per lo spinner-->
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/home_btn_startAndStop"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:contentDescription="Start/stop stopwatch button"
-            android:focusable="true"
-            android:src="@drawable/round_start_24"
-            android:tag="start" />
+            android:gravity="center"
+            android:orientation="horizontal">
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/home_btn_reset"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:clickable="true"
-            android:contentDescription="Restart stopwatch button"
-            android:src="@drawable/reset_24" />
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/home_btn_startAndStop"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:contentDescription="Start/stop stopwatch button"
+                android:focusable="true"
+                android:src="@drawable/round_start_24"
+                android:tag="start" />
 
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/home_btn_reset"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:contentDescription="Restart stopwatch button"
+                android:src="@drawable/reset_24" />
+        </LinearLayout>
 
     </LinearLayout>
 
