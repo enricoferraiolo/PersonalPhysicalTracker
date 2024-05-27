@@ -7,10 +7,4 @@
         android:title="@string/filter"
         app:showAsAction="always"
         android:visible="false"/>
-
-    <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="100"
-        android:title="@string/action_settings"
-        app:showAsAction="never" />
 </menu>
