@@ -1,10 +1,10 @@
-package com.example.personalphysicaltracker.ui.gallery
+package com.example.personalphysicaltracker.ui.charts
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class GalleryViewModel : ViewModel() {
+class ChartsViewModel : ViewModel() {
 
     private val _text = MutableLiveData<String>().apply {
         value = "This is gallery Fragment"

@@ -4,7 +4,9 @@ plugins {
     kotlin("kapt")
 }
 
+
 android {
+
     namespace = "com.example.personalphysicaltracker"
     compileSdk = 34
 
@@ -56,6 +58,7 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.androidx.material3.android)
     implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.mpandroidchart)
     //implementation(libs.desugar.jdk.libs)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(libs.view)

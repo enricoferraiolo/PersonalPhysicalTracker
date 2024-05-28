@@ -14,9 +14,9 @@
 
     <fragment
         android:id="@+id/nav_charts"
-        android:name="com.example.personalphysicaltracker.ui.gallery.GalleryFragment"
+        android:name="com.example.personalphysicaltracker.ui.charts.ChartsFragment"
         android:label="@string/menu_charts"
-        tools:layout="@layout/fragment_gallery" />
+        tools:layout="@layout/fragment_charts" />
 
     <fragment
         android:id="@+id/nav_info"
