@@ -86,7 +86,7 @@ class CalendarFragment : Fragment() {
 
         // Build and show the AlertDialog
         AlertDialog.Builder(requireContext())
-            .setTitle("Select Activities to Filter")
+            .setTitle("Select Activities to show")
             .setView(dialogView)
             .setPositiveButton("Save") { dialog, _ ->
                 val selectedActivities = adapterDialog.getSelectedActivities()
@@ -176,7 +176,7 @@ class CalendarFragment : Fragment() {
         }
 
         // Setup the calendar view
-        setupCalendar(activitiesViewModel)
+        setupCalendar(activitiesViewModel, activitiesListViewModel)
 
         //recyclerview
         // val adapter = CalendarDayAdapter()
@@ -202,7 +202,6 @@ class CalendarFragment : Fragment() {
 
                         this.activitiesList = activitiesList
                         this.filterActivities = activitiesList
-                        binding.weekCalendarView.notifyCalendarChanged() //FIXME: errore a questa riga quando aggiungo un'activity dal manager e torno al calendario, anche quando registro un'attività dalla home fragment e ritorno. ogni volta che aggiorno il db?
                     }
                 } else {
                     binding.tvNoActivities.isVisible = true
@@ -223,7 +222,10 @@ class CalendarFragment : Fragment() {
         //TODO("Not yet implemented")
     }
 
-    private fun setupCalendar(activitiesViewModel: ActivitiesViewModel) {
+    private fun setupCalendar(
+        activitiesViewModel: ActivitiesViewModel,
+        activitiesListViewModel: ActivitiesListViewModel
+    ) {
         val currentMonth = YearMonth.now()
 
         var monthsToSubstract: Long = 0
@@ -264,12 +266,6 @@ class CalendarFragment : Fragment() {
                 val monthsToAdd = ChronoUnit.MONTHS.between(currentMonth, endMonth).coerceAtLeast(0)
 
 
-
-                Log.d(
-                    "CalendarFragment",
-                    "Months to subtract: $monthsToSubtract, months to add: $monthsToAdd"
-                )
-
                 binding.weekCalendarView.setup(
                     currentMonth.minusMonths(monthsToSubtract)
                         .atDay(getDayNumber(firstActivity.startTime)), //bound to first day of the week
@@ -278,6 +274,19 @@ class CalendarFragment : Fragment() {
                     firstDayOfWeekFromLocale()
                 )
                 binding.weekCalendarView.scrollToDate(LocalDate.now())
+
+
+                activitiesViewModel.readAllData.observe(viewLifecycleOwner) { activities ->
+                    activitiesListViewModel.readAllData.observe(viewLifecycleOwner) { activitiesList ->
+                        //check if activitiesList is not empty
+                        if (activitiesList.isNotEmpty()) {
+                            this.activitiesList = activitiesList
+                            this.filterActivities = activitiesList
+                            binding.weekCalendarView.notifyCalendarChanged()
+
+                        }
+                    }
+                }
             }
 
         })
