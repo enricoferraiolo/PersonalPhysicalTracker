@@ -16,3 +16,10 @@
       - da vedere come funziona in primis
         - posso decidere che viene visualizzata dove inizia e dove finisce e basta
   - un'activity registrata con foreign key eliminata (null) viene vista come "Deleted activity"
+  - nomelibreria
+- Chart
+  - grafico a torta con le attività registrate
+  - nomelibreria
+  - le attività eliminate dal activitymanager non vengono contate -> non voglio vedere attività eliminate nel grafico, non utili
+  - le attività che durano più di un giorno vengono contate solo una volta -> conto le attività singole
+  - le attività che iniziano in un mese e finiscono in un altro vengono contate in entrambi i mesi -> le ho svolte in tutti e due i mesi
