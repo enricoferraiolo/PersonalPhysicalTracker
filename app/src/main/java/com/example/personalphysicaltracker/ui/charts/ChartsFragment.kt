@@ -23,6 +23,7 @@ import com.github.mikephil.charting.components.Description
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
+import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.utils.ColorTemplate
 import com.google.android.material.datepicker.DateValidatorPointForward
 import java.time.YearMonth
@@ -105,26 +106,6 @@ class ChartsFragment : Fragment() {
                 }
             }
         }
-
-
-        val pieEntries = ArrayList<PieEntry>()
-
-        for (activity in activitiesList) {
-            val count = activities.count { it.activityId == activity.id }
-            pieEntries.add(PieEntry(count.toFloat(), activity.name))
-        }
-
-        val dataSet = PieDataSet(pieEntries, "Activities")
-        dataSet.setColors(*ColorTemplate.COLORFUL_COLORS)
-
-        val data = PieData(dataSet)
-        pieChart.data = data
-        pieChart.invalidate() // Refresh chart
-
-        val description: Description = Description()
-        description.text = "Activities"
-        pieChart.description = description
-
 
         return root
     }
@@ -236,14 +217,28 @@ class ChartsFragment : Fragment() {
 
         val dataSet = PieDataSet(pieEntries, "Activities")
         dataSet.setColors(*ColorTemplate.COLORFUL_COLORS)
+        dataSet.valueTextSize = 16f
+
+        dataSet.sliceSpace = 2f // spazio tra le sezioni del grafico
+        dataSet.valueFormatter = object : ValueFormatter() {
+            override fun getFormattedValue(value: Float): String {
+                return value.toInt().toString() //no virgola
+            }
+        }
+
+        pieChart.legend.textSize = 16f
+        pieChart.legend.isEnabled = false
 
         val data = PieData(dataSet)
         pieChart.data = data
+        pieChart.setEntryLabelTextSize(16f)
         pieChart.invalidate() // Refresh chart
 
         val description: Description = Description()
-        description.text = "Activities"
+        description.text = "Activities desc"
         pieChart.description = description
+        pieChart.description.isEnabled = false
+
     }
 
     override fun onDestroyView() {
