@@ -1,25 +1,9 @@
-- readme
-- db con room
-  - 3 cosi per ora, activities sono quelle registrate da utente.
-  - activitieslist sono le attivita in generale, quelle nell'app / aggiunte da utente
-- stopwatch service
-  - serve per interagire con lo stopwatch in background
-  - si occupa anche di mandare notifiche foreground
-  - si binda con mainactivity, dopodiche homefragment manda richieste tramite interfaccia stopwatchcontrollistener alla mainactivity, questa attraverso si connette al mio service manda richieste per conto del fragment richiedente
-    - inoltre homefragment e mainactivity usando anche un SharedTimeViewModel per scambiarsi informazioni sullo stopwatch 
-  - si può mettere in pausa perche cosi l'utente può controllare e modificare l'attività in corso
-- Calendar
-  - un'attività registrata viene visualizzata in un dato giorno sse il timestamp della data:
-    - di inizio attività è il giorno corrente-1 e la data di fine attività è dentro al giorno corrente
-    - di fine attività è il giorno corrente+1 e la data di inizio attività è dentro al giorno corrente
-    - e se un'attività dura più di un giorno?
-      - da vedere come funziona in primis
-        - posso decidere che viene visualizzata dove inizia e dove finisce e basta
-  - un'activity registrata con foreign key eliminata (null) viene vista come "Deleted activity"
-  - nomelibreria
-- Chart
-  - grafico a torta con le attività registrate
-  - nomelibreria
-  - le attività eliminate dal activitymanager non vengono contate -> non voglio vedere attività eliminate nel grafico, non utili
-  - le attività che durano più di un giorno vengono contate solo una volta -> conto le attività singole
-  - le attività che iniziano in un mese e finiscono in un altro vengono contate in entrambi i mesi -> le ho svolte in tutti e due i mesi
+In the following project, we have to implement an interactive
+application that monitors the physical activity of the user depending on the
+mean of transportation.\
+A user can be walking, staying still, or, for example, driving a car.\
+The goal of the project is to display the user with an interface where they can start/stop
+one of these activities and these will be recorded in a local database.\
+The user can get access to all the activities done by seeing them in a calendar and receive the report of the monthly activities through plots.\
+Furthermore, when the user is walking/running, we also want to record his/her number of steps taken per activity chunk, so that we know how many steps one person has made daily.\
+The app also provides the user with a background functionality that performs activity recognition.
