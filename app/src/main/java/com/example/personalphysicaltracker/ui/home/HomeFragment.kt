@@ -2,6 +2,8 @@ package com.example.personalphysicaltracker.ui.home
 
 import android.content.Context
 import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
 import android.util.Log
@@ -28,13 +30,19 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.util.Timer
 
 
-class HomeFragment : Fragment() {
+class HomeFragment : Fragment(), SensorEventListener {
     private lateinit var userViewModel: UserViewModel
     private var _binding: FragmentHomeBinding? = null
     private lateinit var activitiesListViewModel: ActivitiesListViewModel //activities list view model
     private lateinit var activitiesViewModel: ActivitiesViewModel //activities registered view model
     private lateinit var stopwatchControlListener: StopwatchControlListener
     private lateinit var sharedTimerViewModel: SharedTimerViewModel
+
+    private var sensorManager: SensorManager? = null
+    private var sensor: Sensor? = null
+    private var totalSteps = 0
+    private var previousTotalSteps = 0
+    private val needsStepCounterActivities: List<String> = listOf("Walking", "Running")
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -92,6 +100,13 @@ class HomeFragment : Fragment() {
                 } else {
                     //no reset if it is the first selection
                     isFirstSpinnerSelection = false
+                }
+
+                //check if activity need step counter
+                if (needsStepCounterActivities.contains(spinner.selectedItem.toString())) {
+                    binding.tvSteps.visibility = View.VISIBLE
+                } else {
+                    binding.tvSteps.visibility = View.GONE
                 }
             }
 
@@ -156,24 +171,68 @@ class HomeFragment : Fragment() {
             }
         }
 
-        val sensorManager =
+
+        //step counter and sensor
+        sensorManager =
             ContextCompat.getSystemService(requireContext(), SensorManager::class.java)
-        val sensor: Sensor? = sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+        //registerStepSensor()
 
-
-        if (sensor == null) {
-            Toast.makeText(requireContext(), "No step counter sensor!", Toast.LENGTH_LONG).show()
-        }
-
-        //trigger notification
-        /*binding.notificationBtn.setOnClickListener {
-            //triggerNotification()
-            //scheduleHourlyNotification()
-        }*/
 
         return root
     }
 
+    private fun registerStepSensor() {
+        sensor = sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+
+        if (sensor == null) {
+            Toast.makeText(requireContext(), "No step counter sensor!", Toast.LENGTH_LONG).show()
+        } else {
+            sensorManager?.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
+        }
+
+    }
+
+    private fun unregisterStepSensor() {
+        sensorManager?.unregisterListener(this)
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        //step sensor
+        //sensorManager?.unregisterListener(this)
+    }
+
+    override fun onSensorChanged(event: SensorEvent?) {
+        totalSteps = event!!.values[0].toInt()
+        val currentSteps = totalSteps - previousTotalSteps
+        binding.tvSteps.text = "Steps: $currentSteps"
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+    }
+
+    private fun resetSteps() {
+        previousTotalSteps = totalSteps
+        binding.tvSteps.text = "Steps: 0"
+        saveData()
+    }
+
+    private fun saveData() {
+        val sharedPreferences =
+            requireActivity().getSharedPreferences("myPrefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putInt("key1", previousTotalSteps)
+        editor.apply()
+    }
+
+    private fun loadData() {
+        val sharedPreferences =
+            requireActivity().getSharedPreferences("myPrefs", Context.MODE_PRIVATE)
+        val savedNumber = sharedPreferences.getInt("key1", 0)
+        Log.d("HomeFragment", "savedNumber: $savedNumber")
+        previousTotalSteps = savedNumber
+    }
 
 
     private fun registerActivity(selectedActivityName: String) {
@@ -227,7 +286,6 @@ class HomeFragment : Fragment() {
 
 
     private fun startStopAction() {
-
         //observe the timer state
         if (binding.homeBtnStartAndStop.tag == "start") {
             startTimer()
@@ -238,6 +296,9 @@ class HomeFragment : Fragment() {
 
     private fun stopTimer(stopwatchAlreadyStopped: Boolean = false) {
         Log.d("HomeFragment", "stopTimer called")
+
+        //step sensor
+        unregisterStepSensor()
 
         changeViewSrc(binding.homeBtnStartAndStop, R.drawable.round_start_24)
         changeViewTag(binding.homeBtnStartAndStop, "start")
@@ -256,6 +317,11 @@ class HomeFragment : Fragment() {
             "startTimer called, stopwatchAlreadyStarted: $stopwatchAlreadyStarted"
         )
 
+        //check if the activity needs step counter
+        if (needsStepCounterActivities.contains(binding.homeSpinner.selectedItem.toString())) {
+            registerStepSensor()
+        }
+
         changeViewSrc(binding.homeBtnStartAndStop, R.drawable.round_stop_24)
         changeViewTag(binding.homeBtnStartAndStop, "stop")
 
@@ -272,6 +338,9 @@ class HomeFragment : Fragment() {
         stopTimer(true)
         binding.homeTimer.text = timeStringFromLong(0)
         stopwatchControlListener.resetStopwatch()
+
+        resetSteps()
+
     }
 
 
@@ -311,4 +380,6 @@ class HomeFragment : Fragment() {
         _binding = null
 
     }
+
+
 }
