@@ -9,7 +9,6 @@ import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
 import android.view.Menu
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -19,6 +18,8 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import androidx.work.PeriodicWorkRequest
+import androidx.work.WorkManager
 import com.example.personalphysicaltracker.data.ActivitiesList
 import com.example.personalphysicaltracker.data.ActivitiesListViewModel
 import com.example.personalphysicaltracker.data.ExtraInfo
@@ -26,6 +27,7 @@ import com.example.personalphysicaltracker.data.UserViewModel
 import com.example.personalphysicaltracker.databinding.ActivityMainBinding
 import com.google.android.material.navigation.NavigationView
 import java.util.Timer
+import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchControlListener {
@@ -119,6 +121,9 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
 
         //SharedTimerViewModel
         sharedTimerViewModel = ViewModelProvider(this).get(SharedTimerViewModel::class.java)
+
+        // Trigger notification
+        schedulePeriodicNotification(6, TimeUnit.HOURS)
     }
 
     override fun onResume() {
@@ -126,6 +131,23 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
 
         // Bind to stopwatch service
         bindToStopwatchService()
+    }
+
+    private fun schedulePeriodicNotification(interval: Long, timeUnit: TimeUnit) {
+        val notificationWork = PeriodicWorkRequest.Builder(
+            NotificationWorker::class.java,
+            interval, timeUnit
+        )
+            .setInitialDelay(
+                interval,
+                timeUnit
+            )//set initial delay before sending the first notification
+            .build()
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "notificationWork",
+            androidx.work.ExistingPeriodicWorkPolicy.UPDATE,
+            notificationWork
+        )
     }
 
     private val serviceConnection = object : ServiceConnection {

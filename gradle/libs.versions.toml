@@ -1,5 +1,5 @@
 [versions]
-agp = "8.4.1"
+agp = "8.5.1"
 kotlin = "1.9.0"
 coreKtx = "1.13.0"
 junit = "4.13.2"
@@ -21,6 +21,7 @@ workRuntimeKtx = "2.10.0-alpha02"
 desugar_jdk_libs = "2.0.4"
 view = "2.5.1"
 mpandroidchart = "v3.1.0"
+workRuntimeKtxVersion = "1.0.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -43,6 +44,7 @@ androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx"
 desugar_jdk_libs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
 view = { group = "com.kizitonwose.calendar", name = "view", version.ref = "view" }
 mpandroidchart = { group = "com.github.PhilJay", name = "MPAndroidChart", version.ref = "mpandroidchart" }
+work-runtime-ktx = { group = "android.arch.work", name = "work-runtime-ktx", version.ref = "workRuntimeKtxVersion" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

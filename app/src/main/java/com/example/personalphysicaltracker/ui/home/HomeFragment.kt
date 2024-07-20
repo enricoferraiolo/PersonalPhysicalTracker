@@ -3,7 +3,6 @@ package com.example.personalphysicaltracker.ui.home
 import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorManager
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,10 +12,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.Toast
-import androidx.annotation.RequiresApi
-import androidx.compose.ui.input.pointer.PointerIcon.Companion.Text
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.personalphysicaltracker.R
@@ -34,15 +30,10 @@ import java.util.Timer
 
 class HomeFragment : Fragment() {
     private lateinit var userViewModel: UserViewModel
-
     private var _binding: FragmentHomeBinding? = null
-
     private lateinit var activitiesListViewModel: ActivitiesListViewModel //activities list view model
-
     private lateinit var activitiesViewModel: ActivitiesViewModel //activities registered view model
-
     private lateinit var stopwatchControlListener: StopwatchControlListener
-
     private lateinit var sharedTimerViewModel: SharedTimerViewModel
 
     override fun onAttach(context: Context) {
@@ -174,8 +165,16 @@ class HomeFragment : Fragment() {
             Toast.makeText(requireContext(), "No step counter sensor!", Toast.LENGTH_LONG).show()
         }
 
+        //trigger notification
+        /*binding.notificationBtn.setOnClickListener {
+            //triggerNotification()
+            //scheduleHourlyNotification()
+        }*/
+
         return root
     }
+
+
 
     private fun registerActivity(selectedActivityName: String) {
         //stop timer
