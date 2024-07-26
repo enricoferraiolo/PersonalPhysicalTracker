@@ -13,7 +13,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.personalphysicaltracker.data.ActivitiesList
 import com.example.personalphysicaltracker.data.ActivitiesListViewModel
-import com.example.personalphysicaltracker.data.ExtraInfo
 import com.example.personalphysicaltracker.databinding.FragmentManageActivitylistBinding
 
 class ManageActivitylist : Fragment() {
@@ -65,7 +64,7 @@ class ManageActivitylist : Fragment() {
         if (inputCheck(activityName)) {
             //Create Object
             val newActivity =
-                ActivitiesList(0, activityName, false, ExtraInfo(false, false, null, null))
+                ActivitiesList(0, activityName, false, null)
 
             //Add Data to Database
             val activitiesListViewModel =

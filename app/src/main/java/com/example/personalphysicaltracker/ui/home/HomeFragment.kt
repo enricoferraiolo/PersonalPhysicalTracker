@@ -23,7 +23,6 @@ import com.example.personalphysicaltracker.StopwatchControlListener
 import com.example.personalphysicaltracker.data.ActivitiesListViewModel
 import com.example.personalphysicaltracker.data.ActivitiesViewModel
 import com.example.personalphysicaltracker.data.Activity
-import com.example.personalphysicaltracker.data.ExtraInfo
 import com.example.personalphysicaltracker.data.UserViewModel
 import com.example.personalphysicaltracker.databinding.FragmentHomeBinding
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -40,9 +39,12 @@ class HomeFragment : Fragment(), SensorEventListener {
 
     private var sensorManager: SensorManager? = null
     private var sensor: Sensor? = null
-    private var totalSteps = 0
-    private var previousTotalSteps = 0
-    private val needsStepCounterActivities: List<String> = listOf("Walking", "Running")
+    private var stepCounterStart = 0
+    private var isStepCounterAvailable = false
+
+
+    //private var totalSteps = 0
+    //private var previousTotalSteps = 0
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -103,7 +105,7 @@ class HomeFragment : Fragment(), SensorEventListener {
                 }
 
                 //check if activity need step counter
-                if (needsStepCounterActivities.contains(spinner.selectedItem.toString())) {
+                if(resources.getStringArray(R.array.needs_step_counter_activities).contains(spinner.selectedItem.toString())){
                     binding.tvSteps.visibility = View.VISIBLE
                 } else {
                     binding.tvSteps.visibility = View.GONE
@@ -123,7 +125,6 @@ class HomeFragment : Fragment(), SensorEventListener {
 
         //btn start activity onclicklister
         binding.homeBtnStartAndStop.setOnClickListener {
-            Log.d("HomeFragment", "-- btn start/stop clicked --")
             startStopAction()
         }
 
@@ -187,10 +188,19 @@ class HomeFragment : Fragment(), SensorEventListener {
         if (sensor == null) {
             Toast.makeText(requireContext(), "No step counter sensor!", Toast.LENGTH_LONG).show()
         } else {
-            sensorManager?.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
+            isStepCounterAvailable = true
+            sensorManager?.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI)
+            Log.d("HomeFragment", "Step counter sensor available")
         }
-
     }
+
+    override fun onResume() {
+        super.onResume()
+
+        //step sensor
+        //registerStepSensor()
+    }
+
 
     private fun unregisterStepSensor() {
         sensorManager?.unregisterListener(this)
@@ -200,44 +210,40 @@ class HomeFragment : Fragment(), SensorEventListener {
         super.onPause()
 
         //step sensor
-        //sensorManager?.unregisterListener(this)
+        sensorManager?.unregisterListener(this)
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
-        totalSteps = event!!.values[0].toInt()
-        val currentSteps = totalSteps - previousTotalSteps
-        binding.tvSteps.text = "Steps: $currentSteps"
+        if (isStepCounterAvailable && event != null) {
+            if (stepCounterStart == 0) {
+                stepCounterStart = event.values[0].toInt()
+            }
+            val currentSteps = event.values[0].toInt() - stepCounterStart
+            sharedTimerViewModel.setElapsedSteps(currentSteps)
+            binding.tvSteps.text = "$currentSteps \uD83D\uDC63"
+        }
     }
+
+    private fun saveStepCount() {
+        sharedTimerViewModel.setElapsedSteps(binding.tvSteps.text.toString().split(" ")[0].toInt())
+    }
+
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
     }
 
     private fun resetSteps() {
-        previousTotalSteps = totalSteps
-        binding.tvSteps.text = "Steps: 0"
-        saveData()
+        binding.tvSteps.text = "0 \uD83D\uDC63"
+        stepCounterStart = 0
+        saveStepCount()
     }
-
-    private fun saveData() {
-        val sharedPreferences =
-            requireActivity().getSharedPreferences("myPrefs", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.putInt("key1", previousTotalSteps)
-        editor.apply()
-    }
-
-    private fun loadData() {
-        val sharedPreferences =
-            requireActivity().getSharedPreferences("myPrefs", Context.MODE_PRIVATE)
-        val savedNumber = sharedPreferences.getInt("key1", 0)
-        Log.d("HomeFragment", "savedNumber: $savedNumber")
-        previousTotalSteps = savedNumber
-    }
-
 
     private fun registerActivity(selectedActivityName: String) {
         //stop timer
         stopTimer(false)
+        //step sensor
+        saveStepCount()
+        unregisterStepSensor()
 
         //register activity
         activitiesListViewModel.readAllData.observe(viewLifecycleOwner) { activities ->
@@ -249,6 +255,15 @@ class HomeFragment : Fragment(), SensorEventListener {
                 val startTime = sharedTimerViewModel.startTime.value ?: 0
                 val stopTime = sharedTimerViewModel.stoptime.value ?: 0
 
+                //steps
+                var steps: Int? = null
+                if (resources.getStringArray(R.array.needs_step_counter_activities)
+                        .contains(selectedActivityName)
+                ) {
+                    steps = binding.tvSteps.text.toString().split(" ")[0].toInt()
+                }
+
+
                 //check if time elapsed is greater than 0, if so, register activity
                 if (elapsedTime > 0) {
                     //register activity
@@ -259,12 +274,7 @@ class HomeFragment : Fragment(), SensorEventListener {
                             selectedActivity.id,
                             startTime,
                             stopTime,
-                            ExtraInfo(
-                                selectedActivity.extra?.stepsSelector ?: false,
-                                selectedActivity.extra?.metersSelector ?: false,
-                                selectedActivity.extra?.steps ?: 0,
-                                selectedActivity.extra?.meters ?: 0
-                            )
+                            steps
                         )
                     )
 
@@ -295,8 +305,6 @@ class HomeFragment : Fragment(), SensorEventListener {
     }
 
     private fun stopTimer(stopwatchAlreadyStopped: Boolean = false) {
-        Log.d("HomeFragment", "stopTimer called")
-
         //step sensor
         unregisterStepSensor()
 
@@ -312,13 +320,8 @@ class HomeFragment : Fragment(), SensorEventListener {
     }
 
     private fun startTimer(stopwatchAlreadyStarted: Boolean = false) {
-        Log.d(
-            "HomeFragment",
-            "startTimer called, stopwatchAlreadyStarted: $stopwatchAlreadyStarted"
-        )
-
         //check if the activity needs step counter
-        if (needsStepCounterActivities.contains(binding.homeSpinner.selectedItem.toString())) {
+        if(resources.getStringArray(R.array.needs_step_counter_activities).contains(binding.homeSpinner.selectedItem.toString())){
             registerStepSensor()
         }
 
@@ -332,15 +335,18 @@ class HomeFragment : Fragment(), SensorEventListener {
         }
 
         updateElapsedTimeDisplay()
+        updateElapsedStepsDisplay()
     }
 
     private fun resetAction() {
+        //timer
         stopTimer(true)
         binding.homeTimer.text = timeStringFromLong(0)
-        stopwatchControlListener.resetStopwatch()
 
+        //step sensor
         resetSteps()
 
+        stopwatchControlListener.resetStopwatch()
     }
 
 
@@ -374,11 +380,19 @@ class HomeFragment : Fragment(), SensorEventListener {
         binding.homeTimer.text = timeStringFromLong(n)
     }
 
+    private fun updateElapsedStepsDisplay() {
+        sharedTimerViewModel.elapsedSteps.observe(viewLifecycleOwner) { steps ->
+            binding.tvSteps.text = "$steps \uD83D\uDC63"
+        }
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
 
+        //step sensor
+        unregisterStepSensor()
     }
 
 

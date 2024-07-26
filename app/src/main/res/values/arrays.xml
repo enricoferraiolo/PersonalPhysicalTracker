@@ -5,4 +5,8 @@
         <item>Walking</item>
         <item>Running</item>
     </string-array>
+    <string-array name="needs_step_counter_activities">
+        <item>Walking</item>
+        <item>Running</item>
+    </string-array>
 </resources>

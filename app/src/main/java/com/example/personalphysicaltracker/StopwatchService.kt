@@ -23,6 +23,7 @@ class StopwatchService : Service() {
         return binder
     }
 
+    //timer
     private var isTimerRunning = false
     private var startTime = 0L
     private var stopTime = 0L

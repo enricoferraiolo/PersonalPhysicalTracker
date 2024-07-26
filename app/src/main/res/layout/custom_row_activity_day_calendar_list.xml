@@ -42,11 +42,21 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.5">
 
+
+        <TextView
+            android:id="@+id/tv_steps_day_calendar_row"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="-1 👣"
+            android:paddingEnd="10px"/>
+
         <TextView
             android:id="@+id/tc_time_day_calendar_row"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="00:00:00 - 23:59:59" />
+
+
 
 
     </LinearLayout>

@@ -15,25 +15,6 @@ data class User(
     val name: String
 )
 
-data class ExtraInfo(
-    val stepsSelector: Boolean = false,
-    val metersSelector: Boolean = false,
-    val steps: Int? = null,
-    val meters: Int? = null,
-)
-
-class ExtraInfoConverter {
-    @TypeConverter
-    fun fromExtraInfo(extraInfo: ExtraInfo?): String? {
-        return extraInfo?.let { Gson().toJson(it) }
-    }
-
-    @TypeConverter
-    fun toExtraInfo(json: String?): ExtraInfo? {
-        return json?.let { Gson().fromJson(it, ExtraInfo::class.java) }
-    }
-}
-
 //ACTIVITIES LIST TABLE
 @Entity(
     tableName = "activitiesList_table",
@@ -44,7 +25,7 @@ data class ActivitiesList(
     val id: Int,
     var name: String,
     val isDefault: Boolean? = false,
-    val extra: ExtraInfo?
+    val steps: Int? = null
 )
 
 //ACTIVITIES TABLE
@@ -73,5 +54,5 @@ data class Activity(
     val activityId: Int?,
     val startTime: Long,
     val stopTime: Long,
-    val extra: ExtraInfo?
+    val steps: Int? = null,
 )

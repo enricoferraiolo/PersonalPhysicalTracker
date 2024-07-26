@@ -22,7 +22,6 @@ import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
 import com.example.personalphysicaltracker.data.ActivitiesList
 import com.example.personalphysicaltracker.data.ActivitiesListViewModel
-import com.example.personalphysicaltracker.data.ExtraInfo
 import com.example.personalphysicaltracker.data.UserViewModel
 import com.example.personalphysicaltracker.databinding.ActivityMainBinding
 import com.google.android.material.navigation.NavigationView
@@ -32,10 +31,9 @@ import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchControlListener {
     override fun onElapsedTimeChanged(elapsedTimeMillis: Long) {
-        Log.d("MainActivity", "Elapsed time: $elapsedTimeMillis")
+        Log.d("MainActivity - sharedTimerViewModel", "Elapsed time: $elapsedTimeMillis")
         sharedTimerViewModel.setElapsedTimeMillis(elapsedTimeMillis)
     }
-
 
     private lateinit var userViewModel: UserViewModel
     private lateinit var activitiesListViewModel: ActivitiesListViewModel
@@ -89,7 +87,7 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
                             0,
                             activityName,
                             true,
-                            ExtraInfo(false, false, null, null)
+                            null
                         )
                     activitiesListViewModel.addActivity(newActivity)
                 }
@@ -205,7 +203,7 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
     }
 
     override fun startStopwatch() {
-        Log.e("MainActivity", "isTimerRunning: ${sharedTimerViewModel.isTimerRunning.value}")
+        Log.d("MainActivity", "isTimerRunning: ${sharedTimerViewModel.isTimerRunning.value}")
         sharedTimerViewModel.setIsTimerRunning(true)
         sharedTimerViewModel.setStartTime(System.currentTimeMillis())
 
@@ -216,7 +214,7 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
     }
 
     override fun stopStopwatch() {
-        Log.e("MainActivity", "isTimerRunning: STOPPED")
+        Log.d("MainActivity", "isTimerRunning: STOPPED")
         sharedTimerViewModel.setIsTimerRunning(false)
         sharedTimerViewModel.setStopTime(System.currentTimeMillis())
 

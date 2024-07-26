@@ -9,7 +9,6 @@ import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.personalphysicaltracker.data.ActivitiesList
 import com.example.personalphysicaltracker.data.Activity
-import com.example.personalphysicaltracker.data.ExtraInfo
 import java.time.LocalDate
 
 class CalendarDayAdapter(
@@ -57,6 +56,8 @@ class CalendarDayAdapter(
         val activityName = activityIdToNameMap[currentitem.activityId]
         val tcTime =
             holder.itemView.findViewById<com.google.android.material.textview.MaterialTextView>(R.id.tc_time_day_calendar_row)
+        val tvSteps =
+            holder.itemView.findViewById<com.google.android.material.textview.MaterialTextView>(R.id.tv_steps_day_calendar_row)
 
 
         // idTextView.text = currentitem.id.toString()
@@ -95,6 +96,13 @@ class CalendarDayAdapter(
                 android.graphics.Typeface.MONOSPACE,
                 android.graphics.Typeface.BOLD
             )
+        }
+
+        //tvSteps.text = currentitem.extra?.steps?.toString() ?: "N/A"
+        if (currentitem.steps != null) {
+            tvSteps.text = currentitem.steps.toString() + " \uD83D\uDC63"
+        } else {
+            tvSteps.text = ""
         }
 
         // Set click listener to show a Toast with the activity name
@@ -161,12 +169,7 @@ class CalendarDayAdapter(
                     .toEpochMilli(), // Start time at 00:00:00
                 stopTime = selectedDate.plusDays(1).atStartOfDay().minusSeconds(1)
                     .toInstant(java.time.ZoneOffset.UTC).toEpochMilli(), // End time at 23:59:59
-                extra = ExtraInfo(
-                    stepsSelector = false,
-                    metersSelector = false,
-                    steps = null,
-                    meters = null
-                )
+                steps = null
             )
             dummyActivities.add(dummyActivity)
         } else {
@@ -185,12 +188,7 @@ class CalendarDayAdapter(
                     startTime = selectedDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC)
                         .toEpochMilli(), // Start time at 00:00:00
                     stopTime = sortedActivities.first().startTime - 1000, // End time before the first activity starts
-                    extra = ExtraInfo(
-                        stepsSelector = false,
-                        metersSelector = false,
-                        steps = null,
-                        meters = null
-                    )
+                    steps = null
                 )
                 dummyActivities.add(dummyActivityBefore)
             }
@@ -207,12 +205,7 @@ class CalendarDayAdapter(
                         activityId = -1, // Assuming -1 represents dummy activity in your system
                         startTime = currentActivity.stopTime + 1000, // Start time one second after the current activity ends
                         stopTime = nextActivity.startTime - 1000, // End time one second before the next activity starts
-                        extra = ExtraInfo(
-                            stepsSelector = false,
-                            metersSelector = false,
-                            steps = null,
-                            meters = null
-                        )
+                        steps = null
                     )
                     dummyActivities.add(dummyActivityBetween)
                 }
@@ -231,12 +224,7 @@ class CalendarDayAdapter(
                     stopTime = selectedDate.plusDays(1).atStartOfDay()
                         .toInstant(java.time.ZoneOffset.UTC).minusSeconds(1)
                         .toEpochMilli(), // End time at 23:59:59
-                    extra = ExtraInfo(
-                        stepsSelector = false,
-                        metersSelector = false,
-                        steps = null,
-                        meters = null
-                    )
+                    steps = null
                 )
                 dummyActivities.add(dummyActivityAfter)
             }

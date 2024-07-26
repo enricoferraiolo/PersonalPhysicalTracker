@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 class SharedTimerViewModel : ViewModel() {
+    //timer
     private val _elapsedTimeMillis = MutableLiveData<Long>()
     val elapsedTimeMillis: LiveData<Long> get() = _elapsedTimeMillis
 
@@ -31,6 +32,14 @@ class SharedTimerViewModel : ViewModel() {
 
     fun setStopTime(time: Long) {
         _stoptime.value = time
+    }
+
+    //step counter
+    private val _elapsedSteps = MutableLiveData<Int>()
+    val elapsedSteps: LiveData<Int> get() = _elapsedSteps
+
+    fun setElapsedSteps(steps: Int) {
+        _elapsedSteps.value = steps
     }
 
 }

@@ -11,7 +11,6 @@ import androidx.sqlite.db.SupportSQLiteDatabase
     version = 1,
     exportSchema = false
 )
-@TypeConverters(ExtraInfoConverter::class)
 abstract class UserDatabase : RoomDatabase() {
 
     abstract fun userDao(): UserDao
