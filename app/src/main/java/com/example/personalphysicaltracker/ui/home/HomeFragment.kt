@@ -1,6 +1,7 @@
 package com.example.personalphysicaltracker.ui.home
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -37,14 +38,13 @@ class HomeFragment : Fragment(), SensorEventListener {
     private lateinit var stopwatchControlListener: StopwatchControlListener
     private lateinit var sharedTimerViewModel: SharedTimerViewModel
 
+    private lateinit var sharedPreferences: SharedPreferences
+
     private var sensorManager: SensorManager? = null
     private var sensor: Sensor? = null
     private var stepCounterStart = 0
     private var isStepCounterAvailable = false
 
-
-    //private var totalSteps = 0
-    //private var previousTotalSteps = 0
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -61,6 +61,8 @@ class HomeFragment : Fragment(), SensorEventListener {
     private val binding get() = _binding!!
 
     private val timer = Timer()
+
+    //FIXME: quando chiudo e riapro l'app e salvo l'attività dopo che ho fatto steps, il timer inizia da 00:00:00 e salva l'attività nel giorno prima
 
     private var isTimerRunning = false
 
@@ -79,8 +81,11 @@ class HomeFragment : Fragment(), SensorEventListener {
             ViewModelProvider(requireActivity()).get(SharedTimerViewModel::class.java)
 
         // Retrieve last selected activity from SharedPreferences
-        val sharedPreferences = requireActivity().getPreferences(Context.MODE_PRIVATE)
+        sharedPreferences = requireActivity().getPreferences(Context.MODE_PRIVATE)
         val savedActivity = sharedPreferences.getString("selectedActivity", null)
+        //retrieve steps
+        val savedSteps = sharedPreferences.getInt("savedSteps", 0)
+        stepCounterStart = sharedPreferences.getInt("stepCounterStart", 0)
 
         //activities spinner
         //fill spinner with activities from db
@@ -197,6 +202,9 @@ class HomeFragment : Fragment(), SensorEventListener {
             ContextCompat.getSystemService(requireContext(), SensorManager::class.java)
         //registerStepSensor()
 
+        // load saved steps
+        binding.tvSteps.text = "$savedSteps \uD83D\uDC63"
+        sharedTimerViewModel.setElapsedSteps(savedSteps)
 
         return root
     }
@@ -229,15 +237,15 @@ class HomeFragment : Fragment(), SensorEventListener {
         super.onPause()
 
         //step sensor
-        sensorManager?.unregisterListener(this)
+        saveStepCount()
+        unregisterStepSensor()
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
-        //FIXME: quando chiudo l'app e la riapro, i passi non vengono più aggiornatie e sono 0
-        //FIXME: quando chiudo l'app e la riapro, l'ultima attività scelta non è più selezionata
         if (isStepCounterAvailable && event != null) {
             if (stepCounterStart == 0) {
                 stepCounterStart = event.values[0].toInt()
+                sharedPreferences.edit().putInt("stepCounterStart", stepCounterStart).apply()
             }
             val currentSteps = event.values[0].toInt() - stepCounterStart
             sharedTimerViewModel.setElapsedSteps(currentSteps)
@@ -246,7 +254,9 @@ class HomeFragment : Fragment(), SensorEventListener {
     }
 
     private fun saveStepCount() {
-        sharedTimerViewModel.setElapsedSteps(binding.tvSteps.text.toString().split(" ")[0].toInt())
+        val steps = binding.tvSteps.text.toString().split(" ")[0].toInt()
+        sharedTimerViewModel.setElapsedSteps(steps)
+        sharedPreferences.edit().putInt("savedSteps", steps).apply()
     }
 
 
@@ -415,7 +425,8 @@ class HomeFragment : Fragment(), SensorEventListener {
         _binding = null
 
         //step sensor
-        unregisterStepSensor()
+        //saveStepCount()
+        //unregisterStepSensor()
     }
 
 
