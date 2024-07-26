@@ -42,4 +42,11 @@ class SharedTimerViewModel : ViewModel() {
         _elapsedSteps.value = steps
     }
 
+    //selected activity
+    private val _selectedActivity = MutableLiveData<String>()
+    val selectedActivity: LiveData<String> get() = _selectedActivity
+
+    fun setSelectedActivity(activity: String) {
+        _selectedActivity.value = activity
+    }
 }
