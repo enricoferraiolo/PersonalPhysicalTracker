@@ -120,7 +120,7 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
         //SharedTimerViewModel
         sharedTimerViewModel = ViewModelProvider(this).get(SharedTimerViewModel::class.java)
 
-        // Trigger notification
+        // Trigger periodic notification
         schedulePeriodicNotification(6, TimeUnit.HOURS)
     }
 

@@ -62,12 +62,11 @@ class HomeFragment : Fragment(), SensorEventListener {
 
     private val timer = Timer()
 
-    //FIXME: quando chiudo e riapro l'app e salvo l'attività dopo che ho fatto steps, il timer inizia da 00:00:00 e salva l'attività nel giorno prima
-
     private var isTimerRunning = false
 
     // spinner is NOT selected when the fragment is created
     private var isFirstSpinnerSelection = true
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -283,7 +282,7 @@ class HomeFragment : Fragment(), SensorEventListener {
                 //activity found
                 //get elapsed time
                 val elapsedTime = sharedTimerViewModel.elapsedTimeMillis.value ?: 0
-                val startTime = sharedTimerViewModel.startTime.value ?: 0
+                val startTime = sharedPreferences.getLong("startTime", 0)
                 val stopTime = sharedTimerViewModel.stoptime.value ?: 0
 
                 //steps
@@ -293,7 +292,6 @@ class HomeFragment : Fragment(), SensorEventListener {
                 ) {
                     steps = binding.tvSteps.text.toString().split(" ")[0].toInt()
                 }
-
 
                 //check if time elapsed is greater than 0, if so, register activity
                 if (elapsedTime > 0) {
@@ -365,6 +363,8 @@ class HomeFragment : Fragment(), SensorEventListener {
         if (stopwatchAlreadyStarted == false) {
             //start the stopwatch if it has not been started yet
             stopwatchControlListener.startStopwatch()
+            //save start time in sharedPreference
+            sharedPreferences.edit().putLong("startTime", System.currentTimeMillis()).apply()
         }
 
         updateElapsedTimeDisplay()
