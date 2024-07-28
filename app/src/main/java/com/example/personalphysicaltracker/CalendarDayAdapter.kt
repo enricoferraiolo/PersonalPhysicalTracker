@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.personalphysicaltracker.data.ActivitiesList
 import com.example.personalphysicaltracker.data.Activity
 import java.time.LocalDate
+import java.time.ZoneId
 
 class CalendarDayAdapter(
     private var activities: List<Activity>,
@@ -58,7 +59,7 @@ class CalendarDayAdapter(
             holder.itemView.findViewById<com.google.android.material.textview.MaterialTextView>(R.id.tc_time_day_calendar_row)
         val tvSteps =
             holder.itemView.findViewById<com.google.android.material.textview.MaterialTextView>(R.id.tv_steps_day_calendar_row)
-
+        val timeZone = currentitem.timeZone
 
         // idTextView.text = currentitem.id.toString()
 
@@ -78,8 +79,8 @@ class CalendarDayAdapter(
         }
 
 
-        val startTimeString = formatTimeClockString(currentitem.startTime, selectedDate, true)
-        val endTimeString = formatTimeClockString(currentitem.stopTime, selectedDate, false)
+        val startTimeString = formatTimeClockString(currentitem.startTime, selectedDate, true, timeZone)
+        val endTimeString = formatTimeClockString(currentitem.stopTime, selectedDate, false, timeZone)
 
         tcTime.text = buildString {
             append(startTimeString)
@@ -114,9 +115,18 @@ class CalendarDayAdapter(
 
     fun formatTimeClockString(
         eventTimeMillis: Long,
-        selectedDate: java.time.LocalDate,
-        isStartTime: Boolean //if true, check if activity started before selectedDate, if false, check if activity ended after selectedDate
+        selectedDate: LocalDate,
+        isStartTime: Boolean, //if true, check if activity started before selectedDate, if false, check if activity ended after selectedDate
+        timeZone: String
     ): String {
+        //handle time zone
+        val zoneId = java.time.ZoneId.of(timeZone)
+        val selectedDateTime = if (isStartTime) {
+            selectedDate.atStartOfDay(zoneId).toInstant().toEpochMilli()
+        } else {
+            selectedDate.plusDays(1).atStartOfDay(zoneId).toInstant().toEpochMilli()
+        }
+
         val selectedDateMillis = if (isStartTime) {
             selectedDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli()
         } else {
@@ -126,7 +136,7 @@ class CalendarDayAdapter(
 
         return if (isStartTime && eventTimeMillis < selectedDateMillis || !isStartTime && eventTimeMillis > selectedDateMillis) {
             val eventDate = java.time.Instant.ofEpochMilli(eventTimeMillis)
-                .atZone(java.time.ZoneOffset.UTC)
+                .atZone(zoneId)
                 .toLocalDate()
             val daysDifference = if (isStartTime) {
                 java.time.temporal.ChronoUnit.DAYS.between(eventDate, selectedDate)
@@ -143,10 +153,10 @@ class CalendarDayAdapter(
                     }.dayOfWeek.toString().substring(0, 3)
                 )
                 append(" ")
-                append(timeStringFromLong(eventTimeMillis, true))
+                append(timeStringFromLong(eventTimeMillis, true, zoneId))
             }
         } else {
-            timeStringFromLong(eventTimeMillis, true)
+            timeStringFromLong(eventTimeMillis, true, zoneId)
         }
     }
 
@@ -169,7 +179,8 @@ class CalendarDayAdapter(
                     .toEpochMilli(), // Start time at 00:00:00
                 stopTime = selectedDate.plusDays(1).atStartOfDay().minusSeconds(1)
                     .toInstant(java.time.ZoneOffset.UTC).toEpochMilli(), // End time at 23:59:59
-                steps = null
+                steps = null,
+                timeZone = java.util.TimeZone.getDefault().id
             )
             dummyActivities.add(dummyActivity)
         } else {
@@ -188,7 +199,8 @@ class CalendarDayAdapter(
                     startTime = selectedDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC)
                         .toEpochMilli(), // Start time at 00:00:00
                     stopTime = sortedActivities.first().startTime - 1000, // End time before the first activity starts
-                    steps = null
+                    steps = null,
+                    timeZone = java.util.TimeZone.getDefault().id
                 )
                 dummyActivities.add(dummyActivityBefore)
             }
@@ -205,7 +217,8 @@ class CalendarDayAdapter(
                         activityId = -1, // Assuming -1 represents dummy activity in your system
                         startTime = currentActivity.stopTime + 1000, // Start time one second after the current activity ends
                         stopTime = nextActivity.startTime - 1000, // End time one second before the next activity starts
-                        steps = null
+                        steps = null,
+                        timeZone = java.util.TimeZone.getDefault().id
                     )
                     dummyActivities.add(dummyActivityBetween)
                 }
@@ -224,7 +237,8 @@ class CalendarDayAdapter(
                     stopTime = selectedDate.plusDays(1).atStartOfDay()
                         .toInstant(java.time.ZoneOffset.UTC).minusSeconds(1)
                         .toEpochMilli(), // End time at 23:59:59
-                    steps = null
+                    steps = null,
+                    timeZone = java.util.TimeZone.getDefault().id
                 )
                 dummyActivities.add(dummyActivityAfter)
             }
@@ -260,10 +274,11 @@ class CalendarDayAdapter(
     }
 
 
-    private fun timeStringFromLong(elapsedTimeMillis: Long, showSeconds: Boolean): String {
-        val seconds = (elapsedTimeMillis / 1000) % 60
-        val minutes = (elapsedTimeMillis / (1000 * 60) % 60)
-        val hours = (elapsedTimeMillis / (1000 * 60 * 60) % 24)
+    private fun timeStringFromLong(elapsedTimeMillis: Long, showSeconds: Boolean, zoneId: ZoneId): String {
+        val localDateTime = java.time.Instant.ofEpochMilli(elapsedTimeMillis).atZone(zoneId).toLocalDateTime()
+        val hours = localDateTime.hour.toLong()
+        val minutes = localDateTime.minute.toLong()
+        val seconds = localDateTime.second.toLong()
         return makeTimeString(hours, minutes, seconds, showSeconds)
     }
 

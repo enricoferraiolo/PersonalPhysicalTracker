@@ -55,4 +55,5 @@ data class Activity(
     val startTime: Long,
     val stopTime: Long,
     val steps: Int? = null,
+    val timeZone: String,
 )

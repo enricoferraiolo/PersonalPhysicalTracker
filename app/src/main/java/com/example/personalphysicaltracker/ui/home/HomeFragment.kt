@@ -293,6 +293,10 @@ class HomeFragment : Fragment(), SensorEventListener {
                     steps = binding.tvSteps.text.toString().split(" ")[0].toInt()
                 }
 
+                //time zone, get timeZone from the system
+                val timeZone = java.util.TimeZone.getDefault().id
+                Log.d("HomeFragment", "Time zone: $timeZone")
+
                 //check if time elapsed is greater than 0, if so, register activity
                 if (elapsedTime > 0) {
                     //register activity
@@ -303,7 +307,8 @@ class HomeFragment : Fragment(), SensorEventListener {
                             selectedActivity.id,
                             startTime,
                             stopTime,
-                            steps
+                            steps,
+                            timeZone
                         )
                     )
 
