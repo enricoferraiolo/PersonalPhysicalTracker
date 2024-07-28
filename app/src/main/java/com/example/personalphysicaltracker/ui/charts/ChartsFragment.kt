@@ -18,15 +18,24 @@ import com.example.personalphysicaltracker.databinding.FragmentChartsBinding
 import com.example.personalphysicaltracker.displayText
 import com.example.personalphysicaltracker.getMonth
 import com.example.personalphysicaltracker.getYear
+import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.components.Description
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.formatter.ValueFormatter
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import com.github.mikephil.charting.utils.ColorTemplate
 import com.google.android.material.datepicker.DateValidatorPointForward
+import java.time.Instant
+import java.time.LocalDateTime
 import java.time.YearMonth
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 
 class ChartsFragment : Fragment() {
@@ -61,6 +70,7 @@ class ChartsFragment : Fragment() {
             ViewModelProvider(this).get(ActivitiesListViewModel::class.java)
 
         val pieChart: PieChart = binding.pieChart
+        val lineChart: LineChart = binding.lineChart
 
         // Inizializzazione del mese visualizzato
         binding.chartsTvMonth.text = currentYearMonth.displayText()
@@ -72,6 +82,7 @@ class ChartsFragment : Fragment() {
             binding.chartsTvMonth.text = currentYearMonth.displayText()
             // Aggiorna il grafico con i dati relativi al nuovo mese
             updatePieChart()
+            updateLineChart()
 
             checkEnabledArrowBtns()
         }
@@ -82,6 +93,7 @@ class ChartsFragment : Fragment() {
             binding.chartsTvMonth.text = currentYearMonth.displayText()
             // Aggiorna il grafico con i dati relativi al nuovo mese
             updatePieChart()
+            updateLineChart()
 
             checkEnabledArrowBtns()
         }
@@ -98,6 +110,7 @@ class ChartsFragment : Fragment() {
                         this.activities = activities
                         this.activitiesList = activitiesList
                         createPieChart(pieChart, getCurrentMonthActivities())
+                        createLineChart(lineChart, getCurrentMonthActivities())
 
                         setFirstAndLastYearMonth()
                     }
@@ -131,6 +144,11 @@ class ChartsFragment : Fragment() {
     private fun updatePieChart() {
         val monthActivities = getCurrentMonthActivities()
         createPieChart(binding.pieChart, monthActivities)
+    }
+
+    private fun updateLineChart() {
+        val monthActivities = getCurrentMonthActivities()
+        createLineChart(binding.lineChart, monthActivities)
     }
 
     private fun getCurrentMonthActivities(): List<Activity> {
@@ -238,6 +256,85 @@ class ChartsFragment : Fragment() {
         description.text = "Activities desc"
         pieChart.description = description
         pieChart.description.isEnabled = false
+
+    }
+
+    private fun createLineChart(lineChart: LineChart, activitiesMonth: List<Activity>) {
+        val lineEntriesMap = mutableMapOf<String, MutableList<Entry>>()
+        val dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+
+        for (activity in activitiesList) {
+            val count = activitiesMonth.count { it.activityId == activity.id }
+
+            //if some count is 0, don't add it to the line chart
+            if(count == 0){
+                continue
+            }
+
+            //if activity has step == null, don't add it to the line chart
+            Log.d("activity.steps", activity.toString())
+            if (activity.steps == null) {
+                continue
+            }
+            lineEntriesMap[activity.name] = mutableListOf()
+        }
+
+        if(activitiesMonth.isNotEmpty() && lineEntriesMap.isEmpty()){
+            lineChart.clear()
+            lineChart.invalidate() // Refresh chart
+            lineChart.setNoDataText("No step-containing activity found for this month.\nDid you deleted some of them?")
+            lineChart.setNoDataTextColor(Color.BLACK)
+            lineChart.description = null
+            return
+        }
+
+        val daysInMonth = currentYearMonth.lengthOfMonth()
+
+        for (day in 1..daysInMonth) {
+            val date = currentYearMonth.atDay(day)
+            val dayActivities = activitiesMonth.filter { activity ->
+                val activityDate = Instant.ofEpochMilli(activity.startTime)
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate()
+                activityDate == date
+            }
+
+            for (activity in activitiesList) {
+                val stepsCount = dayActivities
+                    .filter { it.activityId == activity.id }
+                    .sumOf { it.steps?.toLong() ?: 0L }
+
+                lineEntriesMap[activity.name]?.add(Entry(day.toFloat(), stepsCount.toFloat()))
+            }
+        }
+
+        val lineDataSets = mutableListOf<LineDataSet>()
+        for ((activityName, lineEntries) in lineEntriesMap) {
+            if (lineEntries.isNotEmpty()) {
+                val lineDataSet = LineDataSet(lineEntries, activityName)
+                lineDataSet.color = ColorTemplate.COLORFUL_COLORS[lineDataSets.size % ColorTemplate.COLORFUL_COLORS.size]
+                lineDataSet.valueTextSize = 12f
+                lineDataSets.add(lineDataSet)
+                lineDataSet.valueFormatter = object : ValueFormatter() {
+                    override fun getFormattedValue(value: Float): String {
+                        return value.toInt().toString() //no virgola
+                    }
+                }
+            }
+        }
+
+        lineChart.legend.textSize = 16f
+        lineChart.legend.isEnabled = true
+
+        val lineData = LineData(lineDataSets as List<ILineDataSet>?)
+        lineChart.data = lineData
+        lineChart.invalidate()
+
+        val description: Description = Description()
+        description.text = "Steps per day"
+        lineChart.description = description
+        lineChart.description.isEnabled = true
+        lineChart.setBackgroundColor(Color.WHITE)
 
     }
 

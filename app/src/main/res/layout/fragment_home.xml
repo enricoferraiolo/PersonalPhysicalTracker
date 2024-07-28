@@ -74,7 +74,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp"
-        android:text="registra attività"
+        android:text="REGISTER ACTIVITY"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/home_timer" />
@@ -91,14 +91,16 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/textView5"
+        android:id="@+id/tv_activity_display_info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:text="You've been ... for"
         app:layout_constraintBottom_toTopOf="@+id/home_timer"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        android:visibility="gone"
+        />
 
     <TextView
         android:id="@+id/textView6"

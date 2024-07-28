@@ -82,14 +82,26 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
                 // no activities in db, fill it with default activities
                 val defaultActivities = resources.getStringArray(R.array.default_activityList)
                 for (activityName in defaultActivities) {
-                    val newActivity =
-                        ActivitiesList(
-                            0,
-                            activityName,
-                            true,
-                            null
-                        )
-                    activitiesListViewModel.addActivity(newActivity)
+                    if (activityName in resources.getStringArray(R.array.needs_step_counter_activities)) {
+                        //this activity needs step counter
+                        val newActivity =
+                            ActivitiesList(
+                                0,
+                                activityName,
+                                true,
+                                0
+                            )
+                        activitiesListViewModel.addActivity(newActivity)
+                    } else {
+                        val newActivity =
+                            ActivitiesList(
+                                0,
+                                activityName,
+                                true,
+                                null
+                            )
+                        activitiesListViewModel.addActivity(newActivity)
+                    }
                 }
             }
         }

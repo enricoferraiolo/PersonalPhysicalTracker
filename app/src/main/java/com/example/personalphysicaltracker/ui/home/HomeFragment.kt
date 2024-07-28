@@ -177,7 +177,6 @@ class HomeFragment : Fragment(), SensorEventListener {
             registerActivity(selectedActivity)
         }
 
-
         //check if timer is running from sharedTimerViewModel
         sharedTimerViewModel.elapsedTimeMillis.observe(viewLifecycleOwner) { elapsedTime ->
             binding.homeTimer.text = timeStringFromLong(elapsedTime)
@@ -354,6 +353,9 @@ class HomeFragment : Fragment(), SensorEventListener {
     }
 
     private fun startTimer(stopwatchAlreadyStarted: Boolean = false) {
+        binding.tvActivityDisplayInfo.visibility = View.VISIBLE
+        binding.tvActivityDisplayInfo.text = "You've been ${binding.homeSpinner.selectedItem} for:"
+
         //check if the activity needs step counter
         if (resources.getStringArray(R.array.needs_step_counter_activities)
                 .contains(binding.homeSpinner.selectedItem.toString())
@@ -380,6 +382,9 @@ class HomeFragment : Fragment(), SensorEventListener {
         //timer
         stopTimer(true)
         binding.homeTimer.text = timeStringFromLong(0)
+
+        //activity display info
+        binding.tvActivityDisplayInfo.visibility = View.GONE
 
         //step sensor
         resetSteps()
