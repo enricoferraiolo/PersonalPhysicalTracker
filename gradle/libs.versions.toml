@@ -22,6 +22,8 @@ desugar_jdk_libs = "2.0.4"
 view = "2.5.1"
 mpandroidchart = "v3.1.0"
 workRuntimeKtxVersion = "1.0.1"
+playServicesLocation = "21.3.0"
+easypermissions = "3.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -45,6 +47,8 @@ desugar_jdk_libs = { group = "com.android.tools", name = "desugar_jdk_libs", ver
 view = { group = "com.kizitonwose.calendar", name = "view", version.ref = "view" }
 mpandroidchart = { group = "com.github.PhilJay", name = "MPAndroidChart", version.ref = "mpandroidchart" }
 work-runtime-ktx = { group = "android.arch.work", name = "work-runtime-ktx", version.ref = "workRuntimeKtxVersion" }
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+easypermissions = { group = "pub.devrel", name = "easypermissions", version.ref = "easypermissions" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

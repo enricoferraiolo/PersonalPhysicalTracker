@@ -6,6 +6,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.icu.lang.UCharacter.toLowerCase
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -15,6 +16,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.Toast
+import androidx.compose.ui.text.toLowerCase
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -167,7 +169,7 @@ class HomeFragment : Fragment(), SensorEventListener {
                 Toast.makeText(
                     requireContext(),
                     "Start the timer before registering an activity!",
-                    Toast.LENGTH_LONG
+                    Toast.LENGTH_SHORT
                 ).show()
                 return@setOnClickListener
             }
@@ -190,7 +192,9 @@ class HomeFragment : Fragment(), SensorEventListener {
         val userViewModel = ViewModelProvider(this).get(UserViewModel::class.java)
         userViewModel.readAllData.observe(viewLifecycleOwner) { users ->
             if (users.isNotEmpty()) {
-                binding.homeTvWelcome.text = "Welcome, ${users[0].name}!"
+                //binding.homeTvWelcome.text = "Welcome, ${users[0].name}!"
+                binding.homeTvWelcome.text =
+                    "${getString(R.string.home_tv_welcome)}, ${users[0].name}!"
             }
         }
 
@@ -201,7 +205,7 @@ class HomeFragment : Fragment(), SensorEventListener {
         //registerStepSensor()
 
         // load saved steps
-        binding.tvSteps.text = "$savedSteps \uD83D\uDC63"
+        binding.tvSteps.text = "$savedSteps ${getString(R.string.step_emoji)}"
         sharedTimerViewModel.setElapsedSteps(savedSteps)
 
         return root
@@ -247,7 +251,7 @@ class HomeFragment : Fragment(), SensorEventListener {
             }
             val currentSteps = event.values[0].toInt() - stepCounterStart
             sharedTimerViewModel.setElapsedSteps(currentSteps)
-            binding.tvSteps.text = "$currentSteps \uD83D\uDC63"
+            binding.tvSteps.text = "$currentSteps ${getString(R.string.step_emoji)}"
         }
     }
 
@@ -262,7 +266,7 @@ class HomeFragment : Fragment(), SensorEventListener {
     }
 
     private fun resetSteps() {
-        binding.tvSteps.text = "0 \uD83D\uDC63"
+        binding.tvSteps.text = "0 ${getString(R.string.step_emoji)}"
         stepCounterStart = 0
         saveStepCount()
     }
@@ -354,7 +358,7 @@ class HomeFragment : Fragment(), SensorEventListener {
 
     private fun startTimer(stopwatchAlreadyStarted: Boolean = false) {
         binding.tvActivityDisplayInfo.visibility = View.VISIBLE
-        binding.tvActivityDisplayInfo.text = "You've been ${binding.homeSpinner.selectedItem} for:"
+        binding.tvActivityDisplayInfo.text = "${getString(R.string.home_tv_activity_display_info_before_activity_name)} ${toLowerCase(binding.homeSpinner.selectedItem.toString())} ${getString(R.string.home_tv_activity_display_info_after_activity_name)}:"
 
         //check if the activity needs step counter
         if (resources.getStringArray(R.array.needs_step_counter_activities)
@@ -425,7 +429,7 @@ class HomeFragment : Fragment(), SensorEventListener {
 
     private fun updateElapsedStepsDisplay() {
         sharedTimerViewModel.elapsedSteps.observe(viewLifecycleOwner) { steps ->
-            binding.tvSteps.text = "$steps \uD83D\uDC63"
+            binding.tvSteps.text = "$steps ${getString(R.string.step_emoji)}"
         }
     }
 

@@ -282,7 +282,7 @@ class ChartsFragment : Fragment() {
         if(activitiesMonth.isNotEmpty() && lineEntriesMap.isEmpty()){
             lineChart.clear()
             lineChart.invalidate() // Refresh chart
-            lineChart.setNoDataText("No step-containing activity found for this month.\nDid you deleted some of them?")
+            lineChart.setNoDataText("No step activity found for this month")
             lineChart.setNoDataTextColor(Color.BLACK)
             lineChart.description = null
             return

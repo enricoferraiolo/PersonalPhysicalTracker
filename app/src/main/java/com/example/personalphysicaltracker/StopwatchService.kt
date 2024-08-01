@@ -1,5 +1,6 @@
 package com.example.personalphysicaltracker
 
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.os.Binder
@@ -102,11 +103,19 @@ class StopwatchService : Service() {
 
     private val NOTIFICATION_ID = 1
     private fun updateNotification(text: String) {
+        //create an intent to open the MainActivity when the notification is clicked
+        val intent = Intent(applicationContext, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent: PendingIntent = PendingIntent.getActivity(applicationContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+
+        //create the notification
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Physical Activity")
             .setContentText(text)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setColor(getColor(R.color.ic_launcher_background))
+            .setContentIntent(pendingIntent)
             .build()
 
         startForeground(

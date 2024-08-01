@@ -134,6 +134,8 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
 
         // Trigger periodic notification
         schedulePeriodicNotification(6, TimeUnit.HOURS)
+
+        //background activity recognition
     }
 
     override fun onResume() {
