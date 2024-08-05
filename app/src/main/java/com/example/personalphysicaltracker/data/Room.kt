@@ -11,8 +11,8 @@ import com.google.gson.Gson
 @Entity(tableName = "user_table")
 data class User(
     @PrimaryKey(autoGenerate = true)
-    val id: Int,
-    val name: String
+    val id: Int,    //user id
+    val name: String    //user name
 )
 
 //ACTIVITIES LIST TABLE
@@ -22,10 +22,10 @@ data class User(
 )
 data class ActivitiesList(
     @PrimaryKey(autoGenerate = true)
-    val id: Int,
-    var name: String,
-    val isDefault: Boolean? = false,
-    val steps: Int? = null
+    val id: Int,    //activity id
+    var name: String,   //activity name
+    val isDefault: Boolean? = false,    //true if the activity is a default activity
+    val steps: Int? = null  //number of steps taken during the activity
 )
 
 //ACTIVITIES TABLE
@@ -49,11 +49,12 @@ data class ActivitiesList(
 )
 data class Activity(
     @PrimaryKey(autoGenerate = true)
-    val id: Int,
-    val userId: Int,
-    val activityId: Int?,
-    val startTime: Long,
-    val stopTime: Long,
-    val steps: Int? = null,
-    val timeZone: String,
+    val id: Int,    //activity id
+    val userId: Int,    //user id from user_table
+    val activityId: Int?,   //activity id from activitiesList_table
+    val startTime: Long,    //time in milliseconds
+    val stopTime: Long, //time in milliseconds
+    val steps: Int? = null,  //number of steps taken during the activity
+    val timeZone: String,   //time zone where the activity was recorded
+    val auto: Boolean = false   //true if the activity was automatically detected
 )

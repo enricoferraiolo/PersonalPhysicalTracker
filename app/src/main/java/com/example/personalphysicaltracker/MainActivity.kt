@@ -29,6 +29,7 @@ import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
 import com.example.personalphysicaltracker.data.ActivitiesList
 import com.example.personalphysicaltracker.data.ActivitiesListViewModel
+import com.example.personalphysicaltracker.data.ActivitiesViewModel
 import com.example.personalphysicaltracker.data.UserViewModel
 import com.example.personalphysicaltracker.databinding.ActivityMainBinding
 import com.google.android.gms.location.ActivityRecognition
@@ -52,6 +53,7 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
 
     private lateinit var userViewModel: UserViewModel
     private lateinit var activitiesListViewModel: ActivitiesListViewModel
+    private lateinit var activitiesViewModel: ActivitiesViewModel
     private lateinit var sharedTimerViewModel: SharedTimerViewModel
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
@@ -163,6 +165,11 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
         )
+
+        //activities view model
+        activitiesViewModel = ViewModelProvider(this).get(ActivitiesViewModel::class.java)
+
+        ActivitiesRepository.initialize(activitiesViewModel, userViewModel)
 
         switchActivityTransition.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {

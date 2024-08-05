@@ -13,6 +13,9 @@ import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.lifecycle.ViewModelProvider
+import com.example.personalphysicaltracker.data.ActivitiesViewModel
+import com.example.personalphysicaltracker.data.Activity
 import com.google.android.gms.location.ActivityRecognitionResult
 import com.google.android.gms.location.ActivityTransition
 import com.google.android.gms.location.ActivityTransitionEvent
@@ -33,35 +36,79 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
                     val notificationText = "$activityType: $transitionType"
 
                     context?.let {
+                        //send notification
                         sendNotification(it, notificationText)
+
+                        //save in shared preferences
+                        val sharedPreferences =
+                            it.getSharedPreferences("ActivityTransitionPrefs", Context.MODE_PRIVATE)
+                        val editor = sharedPreferences.edit()
+
+                        if (event.transitionType == ActivityTransition.ACTIVITY_TRANSITION_ENTER) {
+                            // Save start time in milliseconds
+                            editor.putString("last_activity", activityType)
+                            editor.putLong(
+                                "start_time",
+                                event.elapsedRealTimeNanos / 1000000
+                            )
+                            editor.apply()
+                        } else if (event.transitionType == ActivityTransition.ACTIVITY_TRANSITION_EXIT) {
+                            // Save stop time in milliseconds
+                            val startTime =
+                                sharedPreferences.getLong("start_time", -1)
+                            if (startTime != -1L) {
+                                val stopTime = event.elapsedRealTimeNanos / 1000000
+                                val duration = stopTime - startTime
+                                editor.putLong("stop_time", stopTime)
+                                editor.putLong("duration", duration)
+                                editor.apply()
+                            }
+
+                            //register the activity in the database
+                            registerActivityInDb(it)
+                        }
                     }
                     Log.d("ActivityTransition", notificationText)
                 }
             }
-        }else{
+        } else {
             Log.d("ActivityTransitionReceiver", "No result in intent")
 
         }
     }
 
-    /*override fun onReceive(context: Context?, intent: Intent?) {
-        Log.d("ActivityUpdateReceiver", "onReceive called")
-        if (ActivityRecognitionResult.hasResult(intent)) {
-            val result = intent?.let { ActivityRecognitionResult.extractResult(it) }
-            result?.let {
-                val mostProbableActivity = it.mostProbableActivity
-                val activityType = getActivityString(mostProbableActivity.type)
-                val notificationText = "Current activity: $activityType"
+    private fun registerActivityInDb(it: Context) {
+        val activitiesViewModel = ActivitiesRepository.getActivitiesViewModel()
+        val userViewModel = ActivitiesRepository.getUserViewModel()
 
-                context?.let {
-                    sendNotification(it, notificationText)
-                }
-                Log.d("ActivityUpdateReceiver", notificationText)
-            }
-        } else {
-            Log.d("ActivityUpdateReceiver", "No ActivityRecognitionResult in intent")
+        val sharedPreferences = it.getSharedPreferences("ActivityTransitionPrefs", Context.MODE_PRIVATE)
+        val activity = sharedPreferences.getString("last_activity", "")
+        val startTime = sharedPreferences.getLong("start_time", -1)
+        val stopTime = sharedPreferences.getLong("stop_time", -1)
+        val duration = sharedPreferences.getLong("duration", -1)
+
+        //steps
+        var steps: Int? = null
+
+        //time zone, get timeZone from the system
+        val timeZone = java.util.TimeZone.getDefault().id
+
+        if (activity != "" && startTime != -1L && stopTime != -1L && duration != -1L) {
+            //save in database
+            activitiesViewModel?.addActivity(
+               Activity(
+                    0,
+                   userViewModel?.readAllData?.value?.get(0)?.id ?: 0,
+                   0,
+                    startTime,
+                    stopTime,
+                    steps,
+                    timeZone,
+                    true    //auto detected
+               )
+            )
         }
-    }*/
+    }
 
     private fun getActivityString(activityType: Int): String {
         return when (activityType) {

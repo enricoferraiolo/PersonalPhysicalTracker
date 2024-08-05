@@ -311,7 +311,8 @@ class HomeFragment : Fragment(), SensorEventListener {
                             startTime,
                             stopTime,
                             steps,
-                            timeZone
+                            timeZone,
+                            false   //false because the activity was manually registered
                         )
                     )
 

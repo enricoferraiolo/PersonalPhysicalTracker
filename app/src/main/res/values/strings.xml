@@ -31,6 +31,7 @@
 
     <!-- CalendarFragment -->
     <string name="dummy_activity">Dummy activity</string>
+    <string name="calendar_auto_emoji">🤖</string>
 
     <!-- ManageActivitiesFragment -->
     <string name="manage_activities_title">Manage activities</string>

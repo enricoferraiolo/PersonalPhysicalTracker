@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.personalphysicaltracker.data.ActivitiesList
+import com.example.personalphysicaltracker.data.ActivitiesViewModel
 import com.example.personalphysicaltracker.data.Activity
 import java.time.LocalDate
 import java.time.ZoneId
@@ -17,6 +18,8 @@ class CalendarDayAdapter(
     private var activitiesList: List<ActivitiesList>,
     private var selectedDate: LocalDate //yyyy-MM-dd
 ) : RecyclerView.Adapter<CalendarDayAdapter.MyViewHolder>() {
+    private var activitiesViewModel: ActivitiesViewModel = ActivitiesRepository.getActivitiesViewModel()!!
+
     private val activityIdToNameMap: Map<Int?, String> =
         activitiesList.associate { it.id to it.name }.plus(null to "Deleted activity")
 
@@ -52,6 +55,8 @@ class CalendarDayAdapter(
 
         // val idTextView =
         // holder.itemView.findViewById<com.google.android.material.textview.MaterialTextView>(R.id.id_list_day_calendar_row)
+        val autoTextView =
+            holder.itemView.findViewById<com.google.android.material.textview.MaterialTextView>(R.id.tv_auto_day_calendar_row)
         val nameTextView =
             holder.itemView.findViewById<com.google.android.material.textview.MaterialTextView>(R.id.name_day_calendar_row)
         val activityName = activityIdToNameMap[currentitem.activityId]
@@ -106,12 +111,56 @@ class CalendarDayAdapter(
             tvSteps.text = ""
         }
 
+        //auto detected activity
+        if (currentitem.auto) {
+            autoTextView.visibility = View.VISIBLE
+        } else {
+            autoTextView.visibility = View.GONE
+        }
+
         // Set click listener to show a Toast with the activity name
         holder.itemView.setOnClickListener {
             val context: Context = it.context
             Toast.makeText(context, "Activity: ${nameTextView.text}", Toast.LENGTH_SHORT).show()
         }
+
+        //set on long click listener to delete the activity
+        holder.itemView.setOnLongClickListener {
+            //check if the activity is a dummy activity
+            if (currentitem.id < 0) {
+                return@setOnLongClickListener false
+            }
+
+            val context: Context = it.context
+            showDeleteConfirmationDialog(context, currentitem)
+            true
+        }
     }
+
+    private fun showDeleteConfirmationDialog(context: Context, activity: Activity) {
+        val builder = android.app.AlertDialog.Builder(context)
+        builder.setTitle("Delete Activity")
+        builder.setMessage("Are you sure you want to delete this activity?")
+
+        builder.setPositiveButton("OK") { dialog, which ->
+            deleteActivity(activity)
+            Toast.makeText(context, "Activity deleted", Toast.LENGTH_SHORT).show()
+        }
+
+        builder.setNegativeButton("Cancel") { dialog, which ->
+            dialog.dismiss()
+        }
+
+        builder.show()
+    }
+
+    private fun deleteActivity(activity: Activity) {
+        activitiesViewModel.deleteActivity(activity)
+        activities = activities.filter { it.id != activity.id }
+        activitiesOfThisDay = fillWithDummyActivities(getDayActivities(activities, selectedDate, activitiesList))
+        notifyDataSetChanged()
+    }
+
 
     fun formatTimeClockString(
         eventTimeMillis: Long,

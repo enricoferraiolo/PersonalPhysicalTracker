@@ -46,6 +46,9 @@ interface ActivitiesDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun addActivity(activity: Activity)
 
+    @Delete
+    suspend fun deleteActivity(activity: Activity)
+
     @Query("SELECT * FROM activities_table ORDER BY startTime ASC")
     fun readAllData(): LiveData<List<Activity>>
 

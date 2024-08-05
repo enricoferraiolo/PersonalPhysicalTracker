@@ -83,6 +83,12 @@ class ActivitiesViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
+    fun deleteActivity(activity: Activity) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.deleteActivity(activity)
+        }
+    }
+
     fun getFirstActivity(): LiveData<Activity?> {
         return repository.getFirstActivity()
     }
