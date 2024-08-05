@@ -17,6 +17,9 @@
         - posso decidere che viene visualizzata dove inizia e dove finisce e basta
   - un'activity registrata con foreign key eliminata (null) viene vista come "Deleted activity"
   - nomelibreria
+  - se tieni premuto su attivita te la fa eliminare, ovviamente non va per le dummy activities
+  - per attività registrate in modo automatico verrà visualizzata l'icona di un robot a sinistra del nome dell'attività
+  - per attività registrate con l'opzione degli steps, essi verranno visualizzati a sinistra della durata dell'attività, con un'icona di "passi"
 - Chart
   - grafico a torta con le attività registrate
   - nomelibreria
@@ -26,3 +29,7 @@
 - periodic notification
     - tramite workmanager
     - una ogni 6 ore ogni giorno
+- Activity Transition API
+    - funziona se l'utente attiva lo switch
+    - le attività salvate nelle shared pref (tempo inzizio, tempo fine, nome attività)
+    - vengono registrate in automatico
