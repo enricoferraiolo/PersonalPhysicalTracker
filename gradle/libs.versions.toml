@@ -24,6 +24,8 @@ mpandroidchart = "v3.1.0"
 workRuntimeKtxVersion = "1.0.1"
 playServicesLocation = "21.3.0"
 easypermissions = "3.0.0"
+notify = "1.3.0"
+preferenceKtx = "1.2.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -49,6 +51,8 @@ mpandroidchart = { group = "com.github.PhilJay", name = "MPAndroidChart", versio
 work-runtime-ktx = { group = "android.arch.work", name = "work-runtime-ktx", version.ref = "workRuntimeKtxVersion" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 easypermissions = { group = "pub.devrel", name = "easypermissions", version.ref = "easypermissions" }
+notify = { group = "io.karn", name = "notify", version.ref = "notify" }
+androidx-preference-ktx = { group = "androidx.preference", name = "preference-ktx", version.ref = "preferenceKtx" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

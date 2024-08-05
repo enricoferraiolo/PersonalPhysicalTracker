@@ -1,14 +1,21 @@
 package com.example.personalphysicaltracker
 
+import android.Manifest
+import android.app.Application
+import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.ServiceConnection
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
 import android.view.Menu
+import android.widget.Button
+import android.widget.Switch
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -24,12 +31,20 @@ import com.example.personalphysicaltracker.data.ActivitiesList
 import com.example.personalphysicaltracker.data.ActivitiesListViewModel
 import com.example.personalphysicaltracker.data.UserViewModel
 import com.example.personalphysicaltracker.databinding.ActivityMainBinding
+import com.google.android.gms.location.ActivityRecognition
+import com.google.android.gms.location.ActivityRecognitionClient
+import com.google.android.gms.location.ActivityTransition
+import com.google.android.gms.location.ActivityTransitionEvent
+import com.google.android.gms.location.ActivityTransitionRequest
+import com.google.android.gms.location.ActivityTransitionResult
+import com.google.android.gms.location.DetectedActivity
 import com.google.android.material.navigation.NavigationView
-import java.util.Timer
 import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchControlListener {
+
+
     override fun onElapsedTimeChanged(elapsedTimeMillis: Long) {
         Log.d("MainActivity - sharedTimerViewModel", "Elapsed time: $elapsedTimeMillis")
         sharedTimerViewModel.setElapsedTimeMillis(elapsedTimeMillis)
@@ -41,8 +56,10 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
 
-
-    private val timer = Timer()
+    //activity recognition
+    lateinit var switchActivityTransition: Switch
+    private lateinit var client: ActivityRecognitionClient
+    private lateinit var myPendingIntent: PendingIntent
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -136,6 +153,111 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
         schedulePeriodicNotification(6, TimeUnit.HOURS)
 
         //background activity recognition
+        switchActivityTransition = findViewById(R.id.switch_activity_recognition)
+        client = ActivityRecognition.getClient(this)
+
+        val intent = Intent(this, ActivityTransitionReceiver::class.java)
+        myPendingIntent = PendingIntent.getBroadcast(
+            this,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+        )
+
+        switchActivityTransition.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                startActivityRecognition()
+            } else {
+                stopActivityRecognition()
+            }
+        }
+
+        val simulateButton: Button = findViewById(R.id.btnsimulate)
+        simulateButton.setOnClickListener {
+            simulateWalkingActivity()
+        }
+
+    }
+
+
+    private fun startActivityRecognition() {
+        val request = ActivityTransitionRequest(ActivityRecognitionTransitions().transitions)
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACTIVITY_RECOGNITION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            //request permission
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.ACTIVITY_RECOGNITION),
+                    0
+                )
+            }
+            return
+        }
+        client.requestActivityTransitionUpdates(request, myPendingIntent)
+            .addOnSuccessListener {
+                Log.d("MainActivity", "Activity recognition started")
+            }
+            .addOnFailureListener { e ->
+                Log.e("MainActivity", "Failed to start activity recognition", e)
+            }
+        /*client.requestActivityUpdates(1000, myPendingIntent)
+            .addOnSuccessListener {
+                Log.d("MainActivity", "Activity recognition started")
+            }
+            .addOnFailureListener { e ->
+                Log.e("MainActivity", "Failed to start activity recognition", e)
+            }*/
+    }
+
+    private fun stopActivityRecognition() {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACTIVITY_RECOGNITION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            //request permission
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.ACTIVITY_RECOGNITION),
+                    0
+                )
+            }
+            return
+        }
+        client.removeActivityTransitionUpdates(myPendingIntent)
+            .addOnSuccessListener {
+                Log.d("MainActivity", "Activity recognition stopped")
+            }
+            .addOnFailureListener { e ->
+                Log.e("MainActivity", "Failed to stop activity recognition", e)
+            }
+        /*client.removeActivityUpdates(myPendingIntent)
+            .addOnSuccessListener {
+                Log.d("MainActivity", "Activity updates stopped")
+            }
+            .addOnFailureListener { e ->
+                Log.e("MainActivity", "Failed to stop activity updates", e)
+            }*/
+    }
+
+    private fun simulateWalkingActivity() {
+        val intent = Intent(this, ActivityTransitionReceiver::class.java)
+        val event = ActivityTransitionEvent(
+            DetectedActivity.WALKING,
+            ActivityTransition.ACTIVITY_TRANSITION_ENTER,
+            System.currentTimeMillis()
+        )
+        val result = ActivityTransitionResult(listOf(event))
+        intent.putExtra(
+            "com.google.android.gms.location.internal.EXTRA_ACTIVITY_TRANSITION_RESULT",
+            result
+        )
+        sendBroadcast(intent)
     }
 
     override fun onResume() {
@@ -251,3 +373,4 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
     }
 
 }
+

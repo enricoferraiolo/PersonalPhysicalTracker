@@ -27,6 +27,7 @@
     <string name="home_tv_activity_question">What are you doing?</string>
     <string name="home_tv_activity_display_info_before_activity_name">You\'ve been </string>
     <string name="home_tv_activity_display_info_after_activity_name">for</string>
+    <string name="home_switch_activity_recognition">Toggle activity recognition</string>
 
     <!-- CalendarFragment -->
     <string name="dummy_activity">Dummy activity</string>

@@ -60,6 +60,8 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.mpandroidchart)
     implementation(libs.play.services.location)
+    implementation(libs.androidx.preference.ktx)
+    implementation(libs.easypermissions)
     //implementation(libs.work.runtime.ktx)
     //implementation(libs.desugar.jdk.libs)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
