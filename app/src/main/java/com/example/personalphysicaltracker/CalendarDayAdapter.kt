@@ -214,7 +214,7 @@ class CalendarDayAdapter(
             selectedDate.plusDays(1).atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli()
         }
 
-        val applyTimeZone = !(isFirstItemInDay || isLastItemInDay)
+        val applyTimeZone = !(isFirstItemInDay || isLastItemInDay)  // Apply time zone to all items except the first and last items, 00:00:00 and 23:59:59
 
         return if (isStartTime && eventTimeInCurrentZone < selectedDateMillis || !isStartTime && eventTimeInCurrentZone > selectedDateMillis) {   // if the event started before the selected date or ended after the selected date
             val eventDate = java.time.Instant.ofEpochMilli(eventTimeInCurrentZone)

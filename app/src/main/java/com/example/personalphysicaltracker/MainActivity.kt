@@ -181,10 +181,10 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
             }
         }*/
 
-        val simulateButton: Button = findViewById(R.id.btnsimulate)
+        /*val simulateButton: Button = findViewById(R.id.btnsimulate)
         simulateButton.setOnClickListener {
             simulateWalkingActivity()
-        }
+        }*/
 
     }
 

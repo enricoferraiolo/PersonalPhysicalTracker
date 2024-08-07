@@ -193,8 +193,8 @@ class HomeFragment : Fragment(), SensorEventListener {
         userViewModel.readAllData.observe(viewLifecycleOwner) { users ->
             if (users.isNotEmpty()) {
                 //binding.homeTvWelcome.text = "Welcome, ${users[0].name}!"
-                binding.homeTvWelcome.text =
-                    "${getString(R.string.home_tv_welcome)}, ${users[0].name}!"
+                //binding.homeTvWelcome.text =
+                  //  "${getString(R.string.home_tv_welcome)}, ${users[0].name}!"
             }
         }
 
