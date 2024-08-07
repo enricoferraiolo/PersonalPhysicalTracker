@@ -155,7 +155,7 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
         schedulePeriodicNotification(6, TimeUnit.HOURS)
 
         //background activity recognition
-        switchActivityTransition = findViewById(R.id.switch_activity_recognition)
+        //switchActivityTransition = findViewById(R.id.switch_activity_recognition)
         client = ActivityRecognition.getClient(this)
 
         val intent = Intent(this, ActivityTransitionReceiver::class.java)
@@ -171,13 +171,15 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
 
         ActivitiesRepository.initialize(activitiesViewModel, userViewModel)
 
-        switchActivityTransition.setOnCheckedChangeListener { _, isChecked ->
+        //start activity recognition
+        startActivityRecognition()
+        /*switchActivityTransition.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 startActivityRecognition()
             } else {
                 stopActivityRecognition()
             }
-        }
+        }*/
 
         val simulateButton: Button = findViewById(R.id.btnsimulate)
         simulateButton.setOnClickListener {

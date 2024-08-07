@@ -12,13 +12,15 @@ import com.example.personalphysicaltracker.data.ActivitiesViewModel
 import com.example.personalphysicaltracker.data.Activity
 import java.time.LocalDate
 import java.time.ZoneId
+import java.time.ZoneOffset
 
 class CalendarDayAdapter(
     private var activities: List<Activity>,
     private var activitiesList: List<ActivitiesList>,
     private var selectedDate: LocalDate //yyyy-MM-dd
 ) : RecyclerView.Adapter<CalendarDayAdapter.MyViewHolder>() {
-    private var activitiesViewModel: ActivitiesViewModel = ActivitiesRepository.getActivitiesViewModel()!!
+    private var activitiesViewModel: ActivitiesViewModel =
+        ActivitiesRepository.getActivitiesViewModel()!!
 
     private val activityIdToNameMap: Map<Int?, String> =
         activitiesList.associate { it.id to it.name }.plus(null to "Deleted activity")
@@ -83,9 +85,27 @@ class CalendarDayAdapter(
 
         }
 
+        //check if currentItem is first item in day
+        val isFirstItemInDay = position == 0
+        //check if currentItem is last item in day
+        val isLastItemInDay = position == activitiesOfThisDay.size - 1
 
-        val startTimeString = formatTimeClockString(currentitem.startTime, selectedDate, true, timeZone)
-        val endTimeString = formatTimeClockString(currentitem.stopTime, selectedDate, false, timeZone)
+        val startTimeString = formatTimeClockString(
+            currentitem.startTime,
+            selectedDate,
+            true,
+            timeZone,
+            isFirstItemInDay = isFirstItemInDay
+        )
+        val endTimeString = formatTimeClockString(
+            currentitem.stopTime,
+            selectedDate,
+            false,
+            timeZone,
+            isLastItemInDay = isLastItemInDay
+        )
+
+        Log.d("CalendarDayAdapter", "Item: ${currentitem.id} Zone: $timeZone")
 
         tcTime.text = buildString {
             append(startTimeString)
@@ -157,7 +177,8 @@ class CalendarDayAdapter(
     private fun deleteActivity(activity: Activity) {
         activitiesViewModel.deleteActivity(activity)
         activities = activities.filter { it.id != activity.id }
-        activitiesOfThisDay = fillWithDummyActivities(getDayActivities(activities, selectedDate, activitiesList))
+        activitiesOfThisDay =
+            fillWithDummyActivities(getDayActivities(activities, selectedDate, activitiesList))
         notifyDataSetChanged()
     }
 
@@ -165,27 +186,39 @@ class CalendarDayAdapter(
     fun formatTimeClockString(
         eventTimeMillis: Long,
         selectedDate: LocalDate,
-        isStartTime: Boolean, //if true, check if activity started before selectedDate, if false, check if activity ended after selectedDate
-        timeZone: String
+        isStartTime: Boolean, // if true, check if activity started before selectedDate, if false, check if activity ended after selectedDate
+        timeZone: String,
+        isFirstItemInDay: Boolean = false,
+        isLastItemInDay: Boolean = false
     ): String {
-        //handle time zone
-        val zoneId = java.time.ZoneId.of(timeZone)
+        // Handle time zone
+        val savedZoneId = java.time.ZoneId.of(timeZone)
+        val currentZoneId = java.time.ZoneId.systemDefault() // Current phone time zone
+
+        // Convert event time to the current time zone
+        val eventTimeInCurrentZone = java.time.Instant.ofEpochMilli(eventTimeMillis)
+            .atZone(savedZoneId)
+            .withZoneSameInstant(currentZoneId)
+            .toInstant()
+            .toEpochMilli()
+
         val selectedDateTime = if (isStartTime) {
-            selectedDate.atStartOfDay(zoneId).toInstant().toEpochMilli()
+            selectedDate.atStartOfDay(currentZoneId).toInstant().toEpochMilli()
         } else {
-            selectedDate.plusDays(1).atStartOfDay(zoneId).toInstant().toEpochMilli()
+            selectedDate.plusDays(1).atStartOfDay(currentZoneId).toInstant().toEpochMilli()
         }
 
         val selectedDateMillis = if (isStartTime) {
             selectedDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli()
         } else {
-            selectedDate.plusDays(1).atStartOfDay().toInstant(java.time.ZoneOffset.UTC)
-                .toEpochMilli()
+            selectedDate.plusDays(1).atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli()
         }
 
-        return if (isStartTime && eventTimeMillis < selectedDateMillis || !isStartTime && eventTimeMillis > selectedDateMillis) {
-            val eventDate = java.time.Instant.ofEpochMilli(eventTimeMillis)
-                .atZone(zoneId)
+        val applyTimeZone = !(isFirstItemInDay || isLastItemInDay)
+
+        return if (isStartTime && eventTimeInCurrentZone < selectedDateMillis || !isStartTime && eventTimeInCurrentZone > selectedDateMillis) {   // if the event started before the selected date or ended after the selected date
+            val eventDate = java.time.Instant.ofEpochMilli(eventTimeInCurrentZone)
+                .atZone(currentZoneId)
                 .toLocalDate()
             val daysDifference = if (isStartTime) {
                 java.time.temporal.ChronoUnit.DAYS.between(eventDate, selectedDate)
@@ -202,10 +235,10 @@ class CalendarDayAdapter(
                     }.dayOfWeek.toString().substring(0, 3)
                 )
                 append(" ")
-                append(timeStringFromLong(eventTimeMillis, true, zoneId))
+                append(timeStringFromLong(eventTimeInCurrentZone, true, currentZoneId, applyTimeZone))
             }
         } else {
-            timeStringFromLong(eventTimeMillis, true, zoneId)
+            timeStringFromLong(eventTimeInCurrentZone, true, currentZoneId, applyTimeZone)
         }
     }
 
@@ -323,8 +356,17 @@ class CalendarDayAdapter(
     }
 
 
-    private fun timeStringFromLong(elapsedTimeMillis: Long, showSeconds: Boolean, zoneId: ZoneId): String {
-        val localDateTime = java.time.Instant.ofEpochMilli(elapsedTimeMillis).atZone(zoneId).toLocalDateTime()
+    private fun timeStringFromLong(
+        elapsedTimeMillis: Long,
+        showSeconds: Boolean,
+        zoneId: ZoneId,
+        applyTimeZone: Boolean
+    ): String {
+        val localDateTime = if (applyTimeZone) {
+            java.time.Instant.ofEpochMilli(elapsedTimeMillis).atZone(zoneId).toLocalDateTime()
+        } else {
+            java.time.Instant.ofEpochMilli(elapsedTimeMillis).atZone(ZoneOffset.UTC).toLocalDateTime()
+        }
         val hours = localDateTime.hour.toLong()
         val minutes = localDateTime.minute.toLong()
         val seconds = localDateTime.second.toLong()
