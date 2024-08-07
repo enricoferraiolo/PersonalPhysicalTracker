@@ -3,8 +3,8 @@
     <string name="registration_activity">Registration</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_title">Welcome, user</string>
+    <string name="nav_header_subtitle">This is Personal Physical Tracker</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
@@ -21,6 +21,10 @@
     <!-- Other -->
     <string name="step_emoji">👣</string>
 
+    <!-- RegistrationActivity -->
+    <string name="registration_activity_title">Welcome, please register yourself</string>
+    <string name="registration_activity_btn">Register</string>
+
     <!-- HomeFragment -->
     <string name="home_tv_welcome">Welcome</string>
     <string name="home_btn_register_activity">Register activity</string>
@@ -32,10 +36,19 @@
     <!-- CalendarFragment -->
     <string name="dummy_activity">Dummy activity</string>
     <string name="calendar_auto_emoji">🤖</string>
+    <string name="calendar_tv_no_activities">No activities recorded yet</string>
+
+    <!-- ChartsFragment -->
+    <string name="charts_tv_no_activities">No activities recorded yet</string>
 
     <!-- ManageActivitiesFragment -->
     <string name="manage_activities_title">Manage activities</string>
     <string name="manage_activities_desc_add_activity">Add new activity</string>
     <string name="manage_activities_btn_add_activity">Add activity</string>
     <string name="manage_activities_tv_title">Edit activity</string>
+
+    <!-- InformationFragment -->
+    <string name="information_title">About <b>PersonalPhysicalTracker</b></string>
+    <string name="information_author">App was designed and developed by:\n<b><i>Enrico Ferraiolo</i></b></string>
+    <string name="information_purpose"><i>The app was created for educational purposes</i></string>
 </resources>

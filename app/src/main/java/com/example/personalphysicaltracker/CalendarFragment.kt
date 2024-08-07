@@ -8,6 +8,7 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -65,6 +66,19 @@ class CalendarFragment : Fragment() {
 
         // Set a click listener for the filter button
         filterItem.setOnMenuItemClickListener {
+            // Check if the activitiesList is empty
+            if (activitiesList.isEmpty()) {
+                // Show a toast message
+                Toast.makeText(
+                    requireContext(),
+                    "No activities to filter",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                return@setOnMenuItemClickListener true
+            }
+
+
             // Create and show the AlertDialog
             showFilterDialog()
 
@@ -205,6 +219,20 @@ class CalendarFragment : Fragment() {
                     }
                 } else {
                     binding.tvNoActivities.isVisible = true
+                    //check if system has dark mode enabled
+                    if (isDarkModeEnabled(requireContext())) {
+                        binding.tvNoActivities.setTextColor(
+                            requireContext().getColorCompat(
+                                R.color.semi_transparent_white
+                            )
+                        )
+                    } else {
+                        binding.tvNoActivities.setTextColor(
+                            requireContext().getColorCompat(
+                                R.color.semi_transparent_black
+                            )
+                        )
+                    }
                 }
             }
         }

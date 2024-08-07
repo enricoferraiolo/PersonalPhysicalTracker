@@ -186,6 +186,15 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
             simulateWalkingActivity()
         }*/
 
+        //set string for the navigation drawer header
+        val headerView = navView.getHeaderView(0)
+        val tvHeaderTitle =
+            headerView.findViewById<com.google.android.material.textview.MaterialTextView>(R.id.tv_nav_header_main_title)
+        userViewModel.readAllData.observe(this) { users ->
+            if (users.isNotEmpty()) {
+                tvHeaderTitle.text = "Welcome, " + users[0].name
+            }
+        }
     }
 
 

@@ -72,7 +72,7 @@ class ManageActivitylist : Fragment() {
 
             activitiesListViewModel.addActivity(newActivity)
 
-            Toast.makeText(requireContext(), "Successfully added!", Toast.LENGTH_LONG).show()
+            Toast.makeText(requireContext(), "Successfully registered!", Toast.LENGTH_LONG).show()
 
             //clear fields
             binding.insertActivityNameEt.text.clear()

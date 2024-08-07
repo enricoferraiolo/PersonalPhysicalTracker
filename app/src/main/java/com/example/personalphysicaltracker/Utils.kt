@@ -133,3 +133,8 @@ private fun timeStringFromLong(ms: Long): String {
 private fun makeTimeString(hours: Long, minutes: Long, seconds: Long): String {
     return String.format("%02d:%02d:%02d", hours, minutes, seconds)
 }
+
+fun isDarkModeEnabled(context: Context): Boolean {
+    return context.resources.configuration.uiMode and
+            android.content.res.Configuration.UI_MODE_NIGHT_MASK == android.content.res.Configuration.UI_MODE_NIGHT_YES
+}

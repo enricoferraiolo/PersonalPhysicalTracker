@@ -20,9 +20,9 @@
 
     <fragment
         android:id="@+id/nav_info"
-        android:name="com.example.personalphysicaltracker.ui.slideshow.SlideshowFragment"
+        android:name="com.example.personalphysicaltracker.ui.information.InformationFragment"
         android:label="@string/menu_info"
-        tools:layout="@layout/fragment_slideshow" />
+        tools:layout="@layout/fragment_information" />
     <fragment
         android:id="@+id/nav_manageActivityList"
         android:name="com.example.personalphysicaltracker.ui.manageActivitylist.ManageActivitylist"

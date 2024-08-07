@@ -57,7 +57,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="No activities recorded yet"
+            android:text="@string/charts_tv_no_activities"
             android:textColor="@android:color/black"
             android:textSize="18sp"
             android:visibility="gone"

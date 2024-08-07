@@ -10,14 +10,17 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.ViewModelProvider
+import com.example.personalphysicaltracker.R
 import com.example.personalphysicaltracker.data.ActivitiesList
 import com.example.personalphysicaltracker.data.ActivitiesListViewModel
 import com.example.personalphysicaltracker.data.ActivitiesViewModel
 import com.example.personalphysicaltracker.data.Activity
 import com.example.personalphysicaltracker.databinding.FragmentChartsBinding
 import com.example.personalphysicaltracker.displayText
+import com.example.personalphysicaltracker.getColorCompat
 import com.example.personalphysicaltracker.getMonth
 import com.example.personalphysicaltracker.getYear
+import com.example.personalphysicaltracker.isDarkModeEnabled
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.components.Description
@@ -65,6 +68,21 @@ class ChartsFragment : Fragment() {
         _binding = FragmentChartsBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
+        //check if system has dark mode enabled
+        if (isDarkModeEnabled(requireContext())) {
+            binding.tvChartsNoActivities.setTextColor(
+                requireContext().getColorCompat(
+                    R.color.semi_transparent_white
+                )
+            )
+        }else{
+            binding.tvChartsNoActivities.setTextColor(
+                requireContext().getColorCompat(
+                    R.color.semi_transparent_black
+                )
+            )
+        }
+
         val activitiesViewModel = ViewModelProvider(this).get(ActivitiesViewModel::class.java)
         val activitiesListViewModel =
             ViewModelProvider(this).get(ActivitiesListViewModel::class.java)
@@ -75,23 +93,26 @@ class ChartsFragment : Fragment() {
         // Inizializzazione del mese visualizzato
         binding.chartsTvMonth.text = currentYearMonth.displayText()
 
+        //disable arrow buttons
+        binding.chartsArrowBackMonth.isEnabled = false
+        binding.chartsArrowForwardMonth.isEnabled = false
 
-        // Listener per il cambio mese indietro
+        // Listener for the back-arrow month
         binding.chartsArrowBackMonth.setOnClickListener {
             currentYearMonth = currentYearMonth.minusMonths(1)
             binding.chartsTvMonth.text = currentYearMonth.displayText()
-            // Aggiorna il grafico con i dati relativi al nuovo mese
+            // update graph with new month data
             updatePieChart()
             updateLineChart()
 
             checkEnabledArrowBtns()
         }
 
-        // Listener per il cambio mese avanti
+        // Listener for the forward-arrow month
         binding.chartsArrowForwardMonth.setOnClickListener {
             currentYearMonth = currentYearMonth.plusMonths(1)
             binding.chartsTvMonth.text = currentYearMonth.displayText()
-            // Aggiorna il grafico con i dati relativi al nuovo mese
+            // Update graph with new month data
             updatePieChart()
             updateLineChart()
 
@@ -125,8 +146,8 @@ class ChartsFragment : Fragment() {
 
 
     private fun checkEnabledArrowBtns() {
-
         Log.d("firstYearMonth.toString()", lastYearMonth.toString())
+
         if (currentYearMonth <= firstYearMonth) {
             binding.chartsArrowBackMonth.isEnabled = false
         }
