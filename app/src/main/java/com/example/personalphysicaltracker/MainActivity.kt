@@ -29,7 +29,11 @@ import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
 import com.example.personalphysicaltracker.data.ActivitiesList
 import com.example.personalphysicaltracker.data.ActivitiesListViewModel
+import com.example.personalphysicaltracker.data.ActivitiesRepository
 import com.example.personalphysicaltracker.data.ActivitiesViewModel
+import com.example.personalphysicaltracker.data.Activity
+import com.example.personalphysicaltracker.data.User
+import com.example.personalphysicaltracker.data.UserDatabase
 import com.example.personalphysicaltracker.data.UserViewModel
 import com.example.personalphysicaltracker.databinding.ActivityMainBinding
 import com.google.android.gms.location.ActivityRecognition
@@ -40,12 +44,11 @@ import com.google.android.gms.location.ActivityTransitionRequest
 import com.google.android.gms.location.ActivityTransitionResult
 import com.google.android.gms.location.DetectedActivity
 import com.google.android.material.navigation.NavigationView
+import com.google.android.material.textview.MaterialTextView
 import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchControlListener {
-
-
     override fun onElapsedTimeChanged(elapsedTimeMillis: Long) {
         Log.d("MainActivity - sharedTimerViewModel", "Elapsed time: $elapsedTimeMillis")
         sharedTimerViewModel.setElapsedTimeMillis(elapsedTimeMillis)
@@ -59,19 +62,19 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
     private lateinit var binding: ActivityMainBinding
 
     //activity recognition
-    lateinit var switchActivityTransition: Switch
     private lateinit var client: ActivityRecognitionClient
     private lateinit var myPendingIntent: PendingIntent
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        //request permissions
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(
-                    android.Manifest.permission.POST_NOTIFICATIONS,
-                    android.Manifest.permission.ACTIVITY_RECOGNITION
+                    Manifest.permission.POST_NOTIFICATIONS,
+                    Manifest.permission.ACTIVITY_RECOGNITION
                 ),
                 0
             )
@@ -169,27 +172,16 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
         //activities view model
         activitiesViewModel = ViewModelProvider(this).get(ActivitiesViewModel::class.java)
 
-        ActivitiesRepository.initialize(activitiesViewModel, userViewModel)
+        //ActivitiesRepository.initialize(activitiesViewModel, userViewModel)
+        ActivityRep.initialize(this)
 
         //start activity recognition
         startActivityRecognition()
-        /*switchActivityTransition.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                startActivityRecognition()
-            } else {
-                stopActivityRecognition()
-            }
-        }*/
-
-        /*val simulateButton: Button = findViewById(R.id.btnsimulate)
-        simulateButton.setOnClickListener {
-            simulateWalkingActivity()
-        }*/
 
         //set string for the navigation drawer header
         val headerView = navView.getHeaderView(0)
         val tvHeaderTitle =
-            headerView.findViewById<com.google.android.material.textview.MaterialTextView>(R.id.tv_nav_header_main_title)
+            headerView.findViewById<MaterialTextView>(R.id.tv_nav_header_main_title)
         userViewModel.readAllData.observe(this) { users ->
             if (users.isNotEmpty()) {
                 tvHeaderTitle.text = "Welcome, " + users[0].name
@@ -222,13 +214,6 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
             .addOnFailureListener { e ->
                 Log.e("MainActivity", "Failed to start activity recognition", e)
             }
-        /*client.requestActivityUpdates(1000, myPendingIntent)
-            .addOnSuccessListener {
-                Log.d("MainActivity", "Activity recognition started")
-            }
-            .addOnFailureListener { e ->
-                Log.e("MainActivity", "Failed to start activity recognition", e)
-            }*/
     }
 
     private fun stopActivityRecognition() {
@@ -254,13 +239,6 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
             .addOnFailureListener { e ->
                 Log.e("MainActivity", "Failed to stop activity recognition", e)
             }
-        /*client.removeActivityUpdates(myPendingIntent)
-            .addOnSuccessListener {
-                Log.d("MainActivity", "Activity updates stopped")
-            }
-            .addOnFailureListener { e ->
-                Log.e("MainActivity", "Failed to stop activity updates", e)
-            }*/
     }
 
     private fun simulateWalkingActivity() {
@@ -306,7 +284,6 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             val binder = service as StopwatchService.LocalBinder
             val stopwatchService = binder.getService()
-
 
             stopwatchService.addListener(this@MainActivity)
         }
@@ -361,7 +338,7 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
         sharedTimerViewModel.setIsTimerRunning(true)
         sharedTimerViewModel.setStartTime(System.currentTimeMillis())
 
-        // Avvia il cronometro nel servizio StopwatchService
+        // start the stopwatch in StopwatchService
         val intent = Intent(this, StopwatchService::class.java)
         intent.action = StopwatchService.Actions.START.name
         startService(intent)
@@ -372,7 +349,7 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
         sharedTimerViewModel.setIsTimerRunning(false)
         sharedTimerViewModel.setStopTime(System.currentTimeMillis())
 
-        // Ferma il cronometro nel servizio StopwatchService
+        // Stop the stopwatch in StopwatchService
         val intent = Intent(this, StopwatchService::class.java)
         intent.action = StopwatchService.Actions.STOP.name
         startService(intent)
@@ -384,7 +361,7 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
         sharedTimerViewModel.setStartTime(0)
         sharedTimerViewModel.setStopTime(0)
 
-        // Resetta il cronometro nel servizio StopwatchService
+        // Reset the stopwatch in StopwatchService
         val intent = Intent(this, StopwatchService::class.java)
         intent.action = StopwatchService.Actions.RESET.name
         startService(intent)

@@ -94,6 +94,7 @@ class CalendarFragment : Fragment() {
         // Initialize RecyclerView and its adapter
         val recyclerView =
             dialogView.findViewById<RecyclerView>(R.id.dialog_filter_recycler_view_activities)
+
         val adapterDialog = DialogActivitiesAdapter(activitiesList, filterActivities)
         recyclerView.adapter = adapterDialog
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -209,7 +210,8 @@ class CalendarFragment : Fragment() {
                         adapter = CalendarDayAdapter(
                             activities,
                             activitiesList,
-                            selectedDate
+                            selectedDate,
+                            ViewModelProvider(this).get(ActivitiesViewModel::class.java)
                         )
                         recyclerView.adapter = adapter
                         binding.tvNoActivities.isVisible = false

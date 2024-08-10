@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.personalphysicaltracker.data.ActivitiesList
+import com.example.personalphysicaltracker.data.ActivitiesRepository
 import com.example.personalphysicaltracker.data.ActivitiesViewModel
 import com.example.personalphysicaltracker.data.Activity
 import java.time.LocalDate
@@ -17,10 +18,11 @@ import java.time.ZoneOffset
 class CalendarDayAdapter(
     private var activities: List<Activity>,
     private var activitiesList: List<ActivitiesList>,
-    private var selectedDate: LocalDate //yyyy-MM-dd
+    private var selectedDate: LocalDate, //yyyy-MM-dd
+    private var activitiesViewModel: ActivitiesViewModel
 ) : RecyclerView.Adapter<CalendarDayAdapter.MyViewHolder>() {
-    private var activitiesViewModel: ActivitiesViewModel =
-        ActivitiesRepository.getActivitiesViewModel()!!
+    //private var activitiesViewModel: ActivitiesViewModel =
+      //  ActivitiesRepository.getActivitiesViewModel()!!
 
     private val activityIdToNameMap: Map<Int?, String> =
         activitiesList.associate { it.id to it.name }.plus(null to "Deleted activity")

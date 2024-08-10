@@ -7,6 +7,7 @@ import android.os.Binder
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.util.Log
 import androidx.core.app.NotificationCompat
 
 const val CHANNEL_ID = "Stopwatch_channel"
@@ -69,6 +70,7 @@ class StopwatchService : Service() {
                     updateNotification("Elapsed time: ${timeStringFromLong(elapsedTimeMillis)}")
                     updateElapsedTime(elapsedTimeMillis)
                     handler.postDelayed(this, 1000)
+                    Log.d("StopwatchService", "Elapsed time: ${timeStringFromLong(elapsedTimeMillis)}")
                 }
             }
         }
@@ -141,7 +143,6 @@ class StopwatchService : Service() {
         //check if the binding is still active
         listeners.forEach { it.onElapsedTimeChanged(elapsedTimeMillis) }
     }
-
 
     enum class Actions {
         START,

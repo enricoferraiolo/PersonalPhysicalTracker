@@ -1,5 +1,6 @@
 package com.example.personalphysicaltracker
 
+import ActivityRep
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -21,6 +22,9 @@ import com.google.android.gms.location.ActivityTransition
 import com.google.android.gms.location.ActivityTransitionEvent
 import com.google.android.gms.location.ActivityTransitionResult
 import com.google.android.gms.location.DetectedActivity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class ActivityTransitionReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
@@ -77,39 +81,33 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun registerActivityInDb(it: Context) {
-        val activitiesViewModel = ActivitiesRepository.getActivitiesViewModel()
-        val userViewModel = ActivitiesRepository.getUserViewModel()
-
-        val sharedPreferences = it.getSharedPreferences("ActivityTransitionPrefs", Context.MODE_PRIVATE)
+    private fun registerActivityInDb(context: Context) {
+        val sharedPreferences = context.getSharedPreferences("ActivityTransitionPrefs", Context.MODE_PRIVATE)
         val activity = sharedPreferences.getString("last_activity", "")
         val startTime = sharedPreferences.getLong("start_time", -1)
         val stopTime = sharedPreferences.getLong("stop_time", -1)
         val duration = sharedPreferences.getLong("duration", -1)
 
-        //steps
-        var steps: Int? = null
-
-        //time zone, get timeZone from the system
+        val steps: Int? = null
         val timeZone = java.util.TimeZone.getDefault().id
 
         if (activity != "" && startTime != -1L && stopTime != -1L && duration != -1L) {
-            //save in database
-            activitiesViewModel?.addActivity(
-               Activity(
+            GlobalScope.launch(Dispatchers.IO) {
+                val user = ActivityRep.getUser()
+                val newActivity = Activity(
                     0,
-                   userViewModel?.readAllData?.value?.get(0)?.id ?: 0,
-                   0,
+                    user?.id ?: 0,
+                    0,
                     startTime,
                     stopTime,
                     steps,
                     timeZone,
-                    true    //auto detected
-               )
-            )
+                    true
+                )
+                ActivityRep.addActivity(newActivity)
+            }
         }
     }
-
     private fun getActivityString(activityType: Int): String {
         return when (activityType) {
             DetectedActivity.STILL -> "Still"

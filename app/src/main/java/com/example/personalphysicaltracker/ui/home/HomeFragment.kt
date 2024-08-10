@@ -7,6 +7,7 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.icu.lang.UCharacter.toLowerCase
+import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -23,6 +24,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.personalphysicaltracker.R
 import com.example.personalphysicaltracker.SharedTimerViewModel
 import com.example.personalphysicaltracker.StopwatchControlListener
+import com.example.personalphysicaltracker.data.ActivitiesList
 import com.example.personalphysicaltracker.data.ActivitiesListViewModel
 import com.example.personalphysicaltracker.data.ActivitiesViewModel
 import com.example.personalphysicaltracker.data.Activity
@@ -47,6 +49,7 @@ class HomeFragment : Fragment(), SensorEventListener {
     private var stepCounterStart = 0
     private var isStepCounterAvailable = false
 
+    private var userId: Int? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -77,9 +80,12 @@ class HomeFragment : Fragment(), SensorEventListener {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        //SharedTimerViewModel
-        sharedTimerViewModel =
-            ViewModelProvider(requireActivity()).get(SharedTimerViewModel::class.java)
+
+        //check if sharedTimerViewModel is already initialized
+        if (!this::sharedTimerViewModel.isInitialized) {
+            sharedTimerViewModel =
+                ViewModelProvider(requireActivity()).get(SharedTimerViewModel::class.java)
+        }
 
         // Retrieve last selected activity from SharedPreferences
         sharedPreferences = requireActivity().getPreferences(Context.MODE_PRIVATE)
@@ -93,18 +99,7 @@ class HomeFragment : Fragment(), SensorEventListener {
         val spinner: Spinner = binding.homeSpinner
         activitiesListViewModel = ViewModelProvider(this).get(ActivitiesListViewModel::class.java)
         activitiesListViewModel.readAllData.observe(viewLifecycleOwner) { activities ->
-            val activityNames = activities.map { it.name }
-            //fill spinner with activities
-            val adapter =
-                ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, activityNames)
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            spinner.adapter = adapter
-
-            //select last saved activity
-            if (savedActivity != null) {
-                val position = activityNames.indexOf(savedActivity)
-                spinner.setSelection(position)
-            }
+            fillSpinner(spinner, activities, savedActivity)
         }
 
         // Set OnItemSelectedListener for the spinner
@@ -115,29 +110,7 @@ class HomeFragment : Fragment(), SensorEventListener {
                 position: Int,
                 id: Long
             ) {
-                // Call resetAction() when a new item is selected
-                //oncreateview is called and it selects an item when the fragment is created, so we need to check if it is the first selection
-                if (!isFirstSpinnerSelection) {
-                    resetAction()
-                } else {
-                    //no reset if it is the first selection
-                    isFirstSpinnerSelection = false
-                }
-
-                //check if activity need step counter
-                if (resources.getStringArray(R.array.needs_step_counter_activities)
-                        .contains(spinner.selectedItem.toString())
-                ) {
-                    binding.tvSteps.visibility = View.VISIBLE
-                } else {
-                    binding.tvSteps.visibility = View.GONE
-                }
-
-                //save selected activity with SharedPreferences
-                val selectedActivity = spinner.selectedItem.toString()
-                sharedTimerViewModel.setSelectedActivity(selectedActivity)
-                sharedPreferences.edit().putString("selectedActivity", selectedActivity).apply()
-
+                handleItemSelectedSpinner(spinner, view, position, id)
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {
@@ -164,40 +137,14 @@ class HomeFragment : Fragment(), SensorEventListener {
 
         //btn register activity onclicklistener
         binding.homeBtnRegisterActivity.setOnClickListener {
-            //check if timer is running
-            if (binding.homeTimer.text == "00:00:00") {
-                Toast.makeText(
-                    requireContext(),
-                    "Start the timer before registering an activity!",
-                    Toast.LENGTH_SHORT
-                ).show()
-                return@setOnClickListener
-            }
-
-            //register activity
-            val selectedActivity = spinner.selectedItem.toString()
-            registerActivity(selectedActivity)
+            handleRegisterBtnClick(spinner)
         }
 
         //check if timer is running from sharedTimerViewModel
-        sharedTimerViewModel.elapsedTimeMillis.observe(viewLifecycleOwner) { elapsedTime ->
-            binding.homeTimer.text = timeStringFromLong(elapsedTime)
-            if (elapsedTime > 0) {
-                startTimer(true)
-            }
-        }
+        checkTimerIsRunning()
 
-        //welcome message
-        //get user name from db
-        val userViewModel = ViewModelProvider(this).get(UserViewModel::class.java)
-        userViewModel.readAllData.observe(viewLifecycleOwner) { users ->
-            if (users.isNotEmpty()) {
-                //binding.homeTvWelcome.text = "Welcome, ${users[0].name}!"
-                //binding.homeTvWelcome.text =
-                  //  "${getString(R.string.home_tv_welcome)}, ${users[0].name}!"
-            }
-        }
-
+        //set user id
+        setUserId()
 
         //step counter and sensor
         sensorManager =
@@ -205,10 +152,93 @@ class HomeFragment : Fragment(), SensorEventListener {
         //registerStepSensor()
 
         // load saved steps
-        binding.tvSteps.text = "$savedSteps ${getString(R.string.step_emoji)}"
-        sharedTimerViewModel.setElapsedSteps(savedSteps)
+        loadSavedSteps(savedSteps)
 
         return root
+    }
+
+    private fun fillSpinner(
+        spinner: Spinner,
+        activities: List<ActivitiesList>,
+        savedActivity: String?
+    ) {
+        val activityNames = activities.map { it.name }
+        //fill spinner with activities
+        val adapter =
+            ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, activityNames)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner.adapter = adapter
+
+        //select last saved activity
+        if (savedActivity != null) {
+            val position = activityNames.indexOf(savedActivity)
+            spinner.setSelection(position)
+        }
+    }
+
+    private fun handleItemSelectedSpinner(spinner: Spinner, view: View?, position: Int, id: Long) {
+        // Call resetAction() when a new item is selected
+        //oncreateview is called and it selects an item when the fragment is created, so we need to check if it is the first selection
+        if (!isFirstSpinnerSelection && sharedTimerViewModel.isTimerRunning.value == false) {
+            resetAction()
+        } else {
+            //no reset if it is the first selection
+            isFirstSpinnerSelection = false
+        }
+
+        //check if activity need step counter
+        if (resources.getStringArray(R.array.needs_step_counter_activities)
+                .contains(spinner.selectedItem.toString())
+        ) {
+            binding.tvSteps.visibility = View.VISIBLE
+        } else {
+            binding.tvSteps.visibility = View.GONE
+        }
+
+        //save selected activity with SharedPreferences
+        val selectedActivity = spinner.selectedItem.toString()
+        sharedTimerViewModel.setSelectedActivity(selectedActivity)
+        sharedPreferences.edit().putString("selectedActivity", selectedActivity).apply()
+    }
+
+    private fun handleRegisterBtnClick(spinner: Spinner) {
+        //check if timer is running
+        if (binding.homeTimer.text == "00:00:00") {
+            Toast.makeText(
+                requireContext(),
+                "Start the timer before registering an activity!",
+                Toast.LENGTH_SHORT
+            ).show()
+
+            return
+        }
+
+        //register activity
+        val selectedActivity = spinner.selectedItem.toString()
+        registerActivity(selectedActivity)
+    }
+
+    private fun checkTimerIsRunning() {
+        sharedTimerViewModel.elapsedTimeMillis.observe(viewLifecycleOwner) { elapsedTime ->
+            binding.homeTimer.text = timeStringFromLong(elapsedTime)
+            if (elapsedTime > 0) {
+                startTimer(true)
+            }
+        }
+    }
+
+    private fun setUserId() {
+        val userViewModel = ViewModelProvider(this).get(UserViewModel::class.java)
+        userViewModel.readAllData.observe(viewLifecycleOwner) { users ->
+            if (users.isNotEmpty()) {
+                userId = users[0].id
+            }
+        }
+    }
+
+    private fun loadSavedSteps(savedSteps: Int) {
+        binding.tvSteps.text = "$savedSteps ${getString(R.string.step_emoji)}"
+        sharedTimerViewModel.setElapsedSteps(savedSteps)
     }
 
     private fun registerStepSensor() {
@@ -306,7 +336,7 @@ class HomeFragment : Fragment(), SensorEventListener {
                     activitiesViewModel.addActivity(
                         Activity(
                             0,
-                            userViewModel.readAllData.value?.get(0)?.id ?: 0,
+                            userId ?: 0,
                             selectedActivity.id,
                             startTime,
                             stopTime,
@@ -359,7 +389,11 @@ class HomeFragment : Fragment(), SensorEventListener {
 
     private fun startTimer(stopwatchAlreadyStarted: Boolean = false) {
         binding.tvActivityDisplayInfo.visibility = View.VISIBLE
-        binding.tvActivityDisplayInfo.text = "${getString(R.string.home_tv_activity_display_info_before_activity_name)} ${toLowerCase(binding.homeSpinner.selectedItem.toString())} ${getString(R.string.home_tv_activity_display_info_after_activity_name)}:"
+        Log.d("HomeFragment", "Activity: ${binding.homeSpinner.selectedItem.toString()}")
+        binding.tvActivityDisplayInfo.text =
+            "${getString(R.string.home_tv_activity_display_info_before_activity_name)} ${
+                toLowerCase(binding.homeSpinner.selectedItem.toString())
+            } ${getString(R.string.home_tv_activity_display_info_after_activity_name)}:"
 
         //check if the activity needs step counter
         if (resources.getStringArray(R.array.needs_step_counter_activities)
@@ -378,6 +412,7 @@ class HomeFragment : Fragment(), SensorEventListener {
             //save start time in sharedPreference
             sharedPreferences.edit().putLong("startTime", System.currentTimeMillis()).apply()
         }
+
 
         updateElapsedTimeDisplay()
         updateElapsedStepsDisplay()
