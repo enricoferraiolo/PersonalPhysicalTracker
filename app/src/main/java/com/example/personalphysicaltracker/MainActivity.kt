@@ -1,12 +1,10 @@
 package com.example.personalphysicaltracker
 
 import android.Manifest
-import android.app.Application
 import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.Build
@@ -14,8 +12,6 @@ import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
 import android.view.Menu
-import android.widget.Button
-import android.widget.Switch
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -29,20 +25,12 @@ import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
 import com.example.personalphysicaltracker.data.ActivitiesList
 import com.example.personalphysicaltracker.data.ActivitiesListViewModel
-import com.example.personalphysicaltracker.data.ActivitiesRepository
 import com.example.personalphysicaltracker.data.ActivitiesViewModel
-import com.example.personalphysicaltracker.data.Activity
-import com.example.personalphysicaltracker.data.User
-import com.example.personalphysicaltracker.data.UserDatabase
 import com.example.personalphysicaltracker.data.UserViewModel
 import com.example.personalphysicaltracker.databinding.ActivityMainBinding
 import com.google.android.gms.location.ActivityRecognition
 import com.google.android.gms.location.ActivityRecognitionClient
-import com.google.android.gms.location.ActivityTransition
-import com.google.android.gms.location.ActivityTransitionEvent
 import com.google.android.gms.location.ActivityTransitionRequest
-import com.google.android.gms.location.ActivityTransitionResult
-import com.google.android.gms.location.DetectedActivity
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.textview.MaterialTextView
 import java.util.concurrent.TimeUnit
@@ -50,7 +38,7 @@ import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchControlListener {
     override fun onElapsedTimeChanged(elapsedTimeMillis: Long) {
-        Log.d("MainActivity - sharedTimerViewModel", "Elapsed time: $elapsedTimeMillis")
+        //Log.d("MainActivity - sharedTimerViewModel", "Elapsed time: $elapsedTimeMillis")
         sharedTimerViewModel.setElapsedTimeMillis(elapsedTimeMillis)
     }
 
@@ -137,8 +125,7 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
         val navController = findNavController(R.id.nav_host_fragment_content_main)
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
+
         appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.nav_home,
@@ -158,7 +145,6 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
         schedulePeriodicNotification(6, TimeUnit.HOURS)
 
         //background activity recognition
-        //switchActivityTransition = findViewById(R.id.switch_activity_recognition)
         client = ActivityRecognition.getClient(this)
 
         val intent = Intent(this, ActivityTransitionReceiver::class.java)
@@ -172,7 +158,6 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
         //activities view model
         activitiesViewModel = ViewModelProvider(this).get(ActivitiesViewModel::class.java)
 
-        //ActivitiesRepository.initialize(activitiesViewModel, userViewModel)
         ActivityRep.initialize(this)
 
         //start activity recognition
@@ -216,46 +201,6 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
             }
     }
 
-    private fun stopActivityRecognition() {
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACTIVITY_RECOGNITION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            //request permission
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.ACTIVITY_RECOGNITION),
-                    0
-                )
-            }
-            return
-        }
-        client.removeActivityTransitionUpdates(myPendingIntent)
-            .addOnSuccessListener {
-                Log.d("MainActivity", "Activity recognition stopped")
-            }
-            .addOnFailureListener { e ->
-                Log.e("MainActivity", "Failed to stop activity recognition", e)
-            }
-    }
-
-    private fun simulateWalkingActivity() {
-        val intent = Intent(this, ActivityTransitionReceiver::class.java)
-        val event = ActivityTransitionEvent(
-            DetectedActivity.WALKING,
-            ActivityTransition.ACTIVITY_TRANSITION_ENTER,
-            System.currentTimeMillis()
-        )
-        val result = ActivityTransitionResult(listOf(event))
-        intent.putExtra(
-            "com.google.android.gms.location.internal.EXTRA_ACTIVITY_TRANSITION_RESULT",
-            result
-        )
-        sendBroadcast(intent)
-    }
-
     override fun onResume() {
         super.onResume()
 
@@ -297,7 +242,7 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
         val intent = Intent(applicationContext, StopwatchService::class.java)
         applicationContext.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
 
-        Log.d("MainActivity", "Service bound")
+        //Log.d("MainActivity", "Service bound")
     }
 
     private fun unbindFromStopwatchService() {
@@ -306,7 +251,7 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
         serviceConnection.onServiceDisconnected(null)
 
 
-        Log.d("MainActivity", "Service unbound")
+        //Log.d("MainActivity", "Service unbound")
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -334,7 +279,7 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
     }
 
     override fun startStopwatch() {
-        Log.d("MainActivity", "isTimerRunning: ${sharedTimerViewModel.isTimerRunning.value}")
+        //Log.d("MainActivity", "isTimerRunning: ${sharedTimerViewModel.isTimerRunning.value}")
         sharedTimerViewModel.setIsTimerRunning(true)
         sharedTimerViewModel.setStartTime(System.currentTimeMillis())
 
@@ -345,7 +290,7 @@ class MainActivity : AppCompatActivity(), StopwatchServiceListener, StopwatchCon
     }
 
     override fun stopStopwatch() {
-        Log.d("MainActivity", "isTimerRunning: STOPPED")
+        //Log.d("MainActivity", "isTimerRunning: STOPPED")
         sharedTimerViewModel.setIsTimerRunning(false)
         sharedTimerViewModel.setStopTime(System.currentTimeMillis())
 

@@ -15,7 +15,7 @@
     - e se un'attività dura più di un giorno?
       - da vedere come funziona in primis
         - posso decidere che viene visualizzata dove inizia e dove finisce e basta
-  - un'activity registrata con foreign key eliminata (null) viene vista come "Deleted activity"
+  - un'activity registrata con foreign key eliminata (null) viene tolta dalla vista
   - nomelibreria
   - se tieni premuto su attivita te la fa eliminare, ovviamente non va per le dummy activities
   - per attività registrate in modo automatico verrà visualizzata l'icona di un robot a sinistra del nome dell'attività

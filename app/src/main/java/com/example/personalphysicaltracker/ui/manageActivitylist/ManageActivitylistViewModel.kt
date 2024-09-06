@@ -11,12 +11,12 @@ class ManageActivitylistViewModel<ActivitiesList> : ViewModel() {
         ViewModelProvider.AndroidViewModelFactory.getInstance(Application()).create(ActivitiesListViewModel::class.java)
     }
     fun editActivity(activity: com.example.personalphysicaltracker.data.ActivitiesList) {
-        Log.d("ManageActivitylistViewModel", "Updating in db: $activity")
+        //Log.d("ManageActivitylistViewModel", "Updating in db: $activity")
         activitiesListViewModel.updateActivity(activity)
     }
 
     fun deleteActivity(activity: com.example.personalphysicaltracker.data.ActivitiesList) {
-        Log.d("ManageActivitylistViewModel", "Deleting from db: $activity")
+        //Log.d("ManageActivitylistViewModel", "Deleting from db: $activity")
         activitiesListViewModel.deleteActivity(activity)
     }
 

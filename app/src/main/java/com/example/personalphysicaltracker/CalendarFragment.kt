@@ -249,7 +249,6 @@ class CalendarFragment : Fragment() {
     }
 
     private fun loadDayActivities(date: LocalDate) {
-        //TODO("Not yet implemented")
     }
 
     private fun setupCalendar(

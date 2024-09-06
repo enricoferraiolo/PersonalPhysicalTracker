@@ -45,8 +45,6 @@ class ChartsFragment : Fragment() {
 
     private var _binding: FragmentChartsBinding? = null
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
 
     private var activitiesList = emptyList<ActivitiesList>()
@@ -90,7 +88,7 @@ class ChartsFragment : Fragment() {
         val pieChart: PieChart = binding.pieChart
         val lineChart: LineChart = binding.lineChart
 
-        // Inizializzazione del mese visualizzato
+        // Initialize current month
         binding.chartsTvMonth.text = currentYearMonth.displayText()
 
         //disable arrow buttons
@@ -146,7 +144,7 @@ class ChartsFragment : Fragment() {
 
 
     private fun checkEnabledArrowBtns() {
-        Log.d("firstYearMonth.toString()", lastYearMonth.toString())
+        //Log.d("firstYearMonth.toString()", lastYearMonth.toString())
 
         if (currentYearMonth <= firstYearMonth) {
             binding.chartsArrowBackMonth.isEnabled = false
@@ -293,7 +291,7 @@ class ChartsFragment : Fragment() {
             }
 
             //if activity has step == null, don't add it to the line chart
-            Log.d("activity.steps", activity.toString())
+            //Log.d("activity.steps", activity.toString())
             if (activity.steps == null) {
                 continue
             }

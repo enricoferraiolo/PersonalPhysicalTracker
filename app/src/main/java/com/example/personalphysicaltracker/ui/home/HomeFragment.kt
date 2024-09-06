@@ -328,7 +328,7 @@ class HomeFragment : Fragment(), SensorEventListener {
 
                 //time zone, get timeZone from the system
                 val timeZone = java.util.TimeZone.getDefault().id
-                Log.d("HomeFragment", "Time zone: $timeZone")
+                //Log.d("HomeFragment", "Time zone: $timeZone")
 
                 //check if time elapsed is greater than 0, if so, register activity
                 if (elapsedTime > 0) {
@@ -354,10 +354,10 @@ class HomeFragment : Fragment(), SensorEventListener {
                         .show()
 
                 } else {
-                    Log.d("HomeFragment", "No time elapsed ")
+                    //Log.d("HomeFragment", "No time elapsed ")
                 }
             } else {
-                Log.d("HomeFragment", "No activity selected ")
+                //Log.d("HomeFragment", "No activity selected ")
             }
         }
     }
@@ -389,7 +389,7 @@ class HomeFragment : Fragment(), SensorEventListener {
 
     private fun startTimer(stopwatchAlreadyStarted: Boolean = false) {
         binding.tvActivityDisplayInfo.visibility = View.VISIBLE
-        Log.d("HomeFragment", "Activity: ${binding.homeSpinner.selectedItem.toString()}")
+        //Log.d("HomeFragment", "Activity: ${binding.homeSpinner.selectedItem.toString()}")
         binding.tvActivityDisplayInfo.text =
             "${getString(R.string.home_tv_activity_display_info_before_activity_name)} ${
                 toLowerCase(binding.homeSpinner.selectedItem.toString())

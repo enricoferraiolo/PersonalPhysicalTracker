@@ -91,7 +91,7 @@ fun getDayActivities(
     //check if activity has been registered for the day
     //an activity is DISPLAYED IFF given day D and activity A, there is an entry in the database
     //s.t. A.startTime is in D and A.stopTime is in D OR A.startTime is in D-1 and A.stopTime is in D OR A.startTime is in D and A.stopTime is in D+1
-    Log.d("getDayActivities", "filter: $filterActivitiesList")
+    //Log.d("getDayActivities", "filter: $filterActivitiesList")
     return activities.filter { it ->
         val activityStartDate = it.startTime
         val activityEndDate = it.stopTime

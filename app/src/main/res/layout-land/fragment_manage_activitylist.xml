@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".data.fragments.ManageActivitylist">
 
-    <!-- Container per gli elementi di input e pulsanti -->
+    <!-- Container for input elements and btns -->
     <LinearLayout
         android:id="@+id/input_container"
         android:layout_width="0dp"
@@ -63,7 +63,7 @@
 
     </LinearLayout>
 
-    <!-- RecyclerView per la lista delle attività -->
+    <!-- RecyclerView for activities list -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/manager_rv_ActivitiesList"
         android:layout_width="0dp"
@@ -75,5 +75,4 @@
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp" />
 
-    <!-- TODO: fare una tabella che fa vedere activitylist. ogni riga deve avere un bottone modifica e un bottone elimina -->
 </androidx.constraintlayout.widget.ConstraintLayout>

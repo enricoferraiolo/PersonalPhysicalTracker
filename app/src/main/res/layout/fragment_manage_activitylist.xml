@@ -55,9 +55,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/manage_activities_title" />
 
-            <!--
-            TODO: aggiungere campi edittext per la classe extrainfo
-            -->
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -70,9 +68,6 @@
             app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
             tools:layout_editor_absoluteX="0dp" />
     </LinearLayout>
-    <!--
-    TODO: fare una tabella che fa vedere activitylist. ogni riga deve avere un bottone
-    modifica e un bottone elimina
-    -->
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

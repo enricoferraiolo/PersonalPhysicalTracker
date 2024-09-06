@@ -70,7 +70,7 @@ class StopwatchService : Service() {
                     updateNotification("Elapsed time: ${timeStringFromLong(elapsedTimeMillis)}")
                     updateElapsedTime(elapsedTimeMillis)
                     handler.postDelayed(this, 1000)
-                    Log.d("StopwatchService", "Elapsed time: ${timeStringFromLong(elapsedTimeMillis)}")
+                    //Log.d("StopwatchService", "Elapsed time: ${timeStringFromLong(elapsedTimeMillis)}")
                 }
             }
         }
