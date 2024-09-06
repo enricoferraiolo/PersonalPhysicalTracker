@@ -73,7 +73,7 @@ class ChartsFragment : Fragment() {
                     R.color.semi_transparent_white
                 )
             )
-        }else{
+        } else {
             binding.tvChartsNoActivities.setTextColor(
                 requireContext().getColorCompat(
                     R.color.semi_transparent_black
@@ -256,10 +256,10 @@ class ChartsFragment : Fragment() {
         dataSet.setColors(*ColorTemplate.COLORFUL_COLORS)
         dataSet.valueTextSize = 16f
 
-        dataSet.sliceSpace = 2f // spazio tra le sezioni del grafico
+        dataSet.sliceSpace = 2f // space  between slices
         dataSet.valueFormatter = object : ValueFormatter() {
             override fun getFormattedValue(value: Float): String {
-                return value.toInt().toString() //no virgola
+                return value.toInt().toString() //no comma
             }
         }
 
@@ -276,6 +276,12 @@ class ChartsFragment : Fragment() {
         pieChart.description = description
         pieChart.description.isEnabled = false
 
+        //check if system has dark mode enabled
+        if (isDarkModeEnabled(requireContext())) {
+            pieChart.setHoleColor(requireContext().getColorCompat(R.color.semi_transparent_black))
+        } else {
+            pieChart.setHoleColor(requireContext().getColorCompat(R.color.white))
+        }
     }
 
     private fun createLineChart(lineChart: LineChart, activitiesMonth: List<Activity>) {
@@ -286,7 +292,7 @@ class ChartsFragment : Fragment() {
             val count = activitiesMonth.count { it.activityId == activity.id }
 
             //if some count is 0, don't add it to the line chart
-            if(count == 0){
+            if (count == 0) {
                 continue
             }
 
@@ -298,7 +304,7 @@ class ChartsFragment : Fragment() {
             lineEntriesMap[activity.name] = mutableListOf()
         }
 
-        if(activitiesMonth.isNotEmpty() && lineEntriesMap.isEmpty()){
+        if (activitiesMonth.isNotEmpty() && lineEntriesMap.isEmpty()) {
             lineChart.clear()
             lineChart.invalidate() // Refresh chart
             lineChart.setNoDataText("No step activity found for this month")
@@ -331,12 +337,13 @@ class ChartsFragment : Fragment() {
         for ((activityName, lineEntries) in lineEntriesMap) {
             if (lineEntries.isNotEmpty()) {
                 val lineDataSet = LineDataSet(lineEntries, activityName)
-                lineDataSet.color = ColorTemplate.COLORFUL_COLORS[lineDataSets.size % ColorTemplate.COLORFUL_COLORS.size]
+                lineDataSet.color =
+                    ColorTemplate.COLORFUL_COLORS[lineDataSets.size % ColorTemplate.COLORFUL_COLORS.size]
                 lineDataSet.valueTextSize = 12f
                 lineDataSets.add(lineDataSet)
                 lineDataSet.valueFormatter = object : ValueFormatter() {
                     override fun getFormattedValue(value: Float): String {
-                        return value.toInt().toString() //no virgola
+                        return value.toInt().toString() //no comma
                     }
                 }
             }
@@ -355,6 +362,26 @@ class ChartsFragment : Fragment() {
         lineChart.description.isEnabled = true
         lineChart.setBackgroundColor(Color.WHITE)
 
+        //check if system has dark mode enabled
+        if (isDarkModeEnabled(requireContext())) {
+            lineChart.setBackgroundColor(requireContext().getColorCompat(R.color.semi_transparent_black))
+            lineChart.xAxis.textColor = requireContext().getColorCompat(R.color.white)
+            lineChart.axisLeft.textColor = requireContext().getColorCompat(R.color.white)
+            lineChart.axisRight.textColor = requireContext().getColorCompat(R.color.white)
+            lineChart.legend.textColor = requireContext().getColorCompat(R.color.white)
+            lineChart.lineData.dataSets.forEach {
+                it.valueTextColor = requireContext().getColorCompat(R.color.white)
+            }
+        } else {
+            lineChart.setBackgroundColor(requireContext().getColorCompat(R.color.white))
+            lineChart.xAxis.textColor = requireContext().getColorCompat(R.color.black)
+            lineChart.axisLeft.textColor = requireContext().getColorCompat(R.color.black)
+            lineChart.axisRight.textColor = requireContext().getColorCompat(R.color.black)
+            lineChart.legend.textColor = requireContext().getColorCompat(R.color.black)
+            lineChart.lineData.dataSets.forEach {
+                it.valueTextColor = requireContext().getColorCompat(R.color.black)
+            }
+        }
     }
 
     override fun onDestroyView() {
